@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Registro</h1>
+<form method="POST" action="{{ url_for('auth.register') }}">
+    <div class="mb-3">
+        <label class="form-label">Nombre de Usuario</label>
+        <input type="text" class="form-control" name="username" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Apellido</label>
+        <input type="text" class="form-control" name="apellido">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Teléfono</label>
+        <input type="tel" class="form-control" name="telefono">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Correo</label>
+        <input type="email" class="form-control" name="email" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <input type="password" class="form-control" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Registrarse</button>
+</form>
+{% endblock %}

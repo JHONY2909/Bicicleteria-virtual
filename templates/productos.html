@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Lista de Productos</h2>
+
+<div class="mb-4">
+    <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">Volver</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Subcategoría</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in productos %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.nombre }}</td>
+                <td>{{ product.precio }}</td>
+                <td>{{ product.stock }}</td>
+                <td>{{ product.subcategoria.nombre }}</td>
+                <td>
+                    <a href="{{ url_for('dashboard.editar_producto', product_id=product.id) }}" class="btn btn-primary btn-sm">Editar</a>
+                    <form class="delete-product-form" data-product-id="{{ product.id }}" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    document.querySelectorAll('.delete-product-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = this.getAttribute('data-product-id');
+            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+                fetch(`/dashboard/admin/eliminar_producto/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar el producto');
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

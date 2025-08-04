@@ -1,0 +1,3 @@
+INSERT INTO categorias (nombre) VALUES ('Bicicletas de Montaña');
+INSERT INTO usuarios (nombre_usuario, contrasena, correo, rol) VALUES ('admin', 'pbkdf2:sha256:600000$eZSZyWfuCdVKPf4m$2eb606634daebf48d67aba1e65543b654bbb7af3b5b70f7f97451d23c7fa59b4', 'admin@example.com', 'administrador');
+INSERT INTO usuarios (nombre_usuario, contrasena, correo, rol) VALUES ('cliente1', 'pbkdf2:sha256:600000$s6ALOV7elwd94Kum$803c1dbdbd1a7defce17b7a2d6d4123831420a316f415dd6249e6b4ead73a9b5', 'cliente1@example.com', 'cliente');

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Panel de {{ rol | capitalize }}</h2>
+
+{% if rol == 'cliente' %}
+    <h3>Tus Pedidos</h3>
+    <div class="mb-4">
+        {% if pedidos %}
+            <table class="table table-striped">
+                {% for pedido in pedidos %}
+                    <tr>
+                        <td>Pedido #{{ pedido.id }} - Monto: ${{ pedido.monto_total }} - Estado: {{ pedido.estado }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No tienes pedidos aún.</p>
+        {% endif %}
+    </div>
+
+    <h3>Catálogo de Productos</h3>
+    <div class="mb-4">
+        <form method="POST" id="filter-form">
+            <div class="mb-3">
+                <label for="category_id" class="form-label">Filtrar por Categoría:</label>
+                <select name="category_id" id="category_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todas</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category_id == category.id|string %}selected{% endif %}>{{ category.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="subcategory_id" class="form-label">Filtrar por Subcategoría:</label>
+                <select name="subcategory_id" id="subcategory_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todas</option>
+                    {% for subcategory in subcategories %}
+                        {% if selected_category_id and subcategory.categoria_id == selected_category_id|int %}
+                            <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>{{ subcategory.nombre }}</option>
+                        {% elif not selected_category_id %}
+                            <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>{{ subcategory.nombre }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        {% if products %}
+            {% for product in products %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        {% if product.url_imagen %}
+                            <img src="{{ product.url_imagen }}" class="card-img-top" alt="{{ product.nombre }}">
+                        {% else %}
+                            <img src="/static/images/placeholder.png" class="card-img-top" alt="Sin imagen">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.nombre }}</h5>
+                            <p class="card-text">Subcategoría: {{ product.subcategoria.nombre if product.subcategoria else 'Sin subcategoría' }}</p>
+                            <p class="card-text">{{ product.descripcion }}</p>
+                            <p class="card-text">Precio: ${{ product.precio }}</p>
+                            <p class="card-text">Stock: {{ product.stock }}</p>
+                            <form class="add-to-cart-form" data-product-id="{{ product.id }}">
+                                <button type="submit" class="btn btn-primary">Agregar al Carrito</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No hay productos disponibles.</p>
+        {% endif %}
+    </div>
+
+{% elif rol == 'vendedor' %}
+    <h3>Pedidos Pendientes</h3>
+    <div>
+        {% if pedidos %}
+            <table class="table table-striped">
+                {% for pedido in pedidos %}
+                    <tr>
+                        <td>Pedido #{{ pedido.id }} - Cliente: {{ pedido.usuario.nombre_usuario }} - Monto: ${{ pedido.monto_total }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No hay pedidos pendientes.</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+<script>
+    document.getElementById('category_id').addEventListener('change', function() {
+        const categoryId = this.value;
+        const subcategorySelect = document.getElementById('subcategory_id');
+        subcategorySelect.innerHTML = '<option value="">Todas</option>';
+        if (categoryId) {
+            fetch(`/subcategories/${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(subcat => {
+                        const option = document.createElement('option');
+                        option.value = subcat.id;
+                        option.textContent = subcat.nombre;
+                        subcategorySelect.appendChild(option);
+                    });
+                });
+        }
+    });
+
+    document.querySelectorAll('.add-to-cart-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = this.getAttribute('data-product-id');
+            fetch(`/cart/add_to_cart/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '{{ url_for('cart.cart') }}';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al agregar al carrito');
+            });
+        });
+    });
+</script>
+{% endblock %}

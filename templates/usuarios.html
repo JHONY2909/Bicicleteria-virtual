@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Lista de Usuarios</h2>
+
+<div class="mb-4">
+    <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">Volver</a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if usuarios %}
+            {% for user in usuarios %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.nombre_usuario }}</td>
+                    <td>{{ user.rol }}</td>
+                    <td>
+                        {% if user.id != current_user.id %}
+                            <form class="delete-user-form" data-user-id="{{ user.id }}" style="display: inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                        {% else %}
+                            <span class="text-muted">No eliminable</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="4">No hay usuarios registrados.</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<script>
+    document.querySelectorAll('.delete-user-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-user-id');
+            if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+                fetch(`/dashboard/admin/eliminar_usuario/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar el usuario');
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

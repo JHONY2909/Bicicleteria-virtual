@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Gestionar Categorías y Subcategorías</h2>
+
+<div class="mb-4">
+    <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">Volver</a>
+</div>
+
+<h3>Agregar Nueva Categoría</h3>
+<form method="POST" action="">
+    <div class="mb-3">
+        <label for="nombre_categoria" class="form-label">Nombre Categoría:</label>
+        <input type="text" class="form-control" id="nombre_categoria" name="nombre_categoria" required>
+    </div>
+    <div class="mb-3">
+        <label for="nombre_subcategoria" class="form-label">Nombre Subcategoría (opcional):</label>
+        <input type="text" class="form-control" id="nombre_subcategoria" name="nombre_subcategoria">
+    </div>
+    <button type="submit" class="btn btn-primary">Agregar Categoría</button>
+</form>
+
+<h3>Agregar Subcategoría a Categoría Existente</h3>
+<form method="POST" action="{{ url_for('dashboard.agregar_subcategoria') }}">
+    <div class="mb-3">
+        <label for="categoria_id" class="form-label">Seleccionar Categoría:</label>
+        <select class="form-select" id="categoria_id" name="categoria_id" required>
+            <option value="">Selecciona una categoría</option>
+            {% for categoria in categorias %}
+            <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="nombre_subcategoria" class="form-label">Nombre Subcategoría:</label>
+        <input type="text" class="form-control" id="nombre_subcategoria" name="nombre_subcategoria" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Agregar Subcategoría</button>
+</form>
+
+<h3>Lista de Categorías</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if categorias %}
+            {% for categoria in categorias %}
+                <tr>
+                    <td>{{ categoria.id }}</td>
+                    <td>{{ categoria.nombre }}</td>
+                    <td>
+                        <form class="delete-categoria-form" data-categoria-id="{{ categoria.id }}" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="3">No hay categorías registradas.</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<h3>Lista de Subcategorías</h3>
+<p>Debug: Subcategorías recibidas: {{ subcategorias|length }}</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if subcategorias %}
+            {% for subcategoria in subcategorias %}
+                <tr>
+                    <td>{{ subcategoria.id }}</td>
+                    <td>{{ subcategoria.nombre }}</td>
+                    <td>{{ subcategoria.categoria.nombre }}</td>
+                    <td>
+                        <form class="delete-subcategoria-form" data-subcategoria-id="{{ subcategoria.id }}" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="4">No hay subcategorías registradas.</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<script>
+    document.querySelectorAll('.delete-categoria-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const categoriaId = this.getAttribute('data-categoria-id');
+            if (confirm('¿Estás seguro de que deseas eliminar esta categoría? Esto eliminará todas sus subcategorías y productos asociados.')) {
+                fetch(`/dashboard/admin/eliminar_categoria/${categoriaId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar la categoría');
+                });
+            }
+        });
+    });
+
+    document.querySelectorAll('.delete-subcategoria-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const subcategoriaId = this.getAttribute('data-subcategoria-id');
+            if (confirm('¿Estás seguro de que deseas eliminar esta subcategoría? Esto eliminará todos los productos asociados.')) {
+                fetch(`/dashboard/admin/eliminar_subcategoria/${subcategoria_id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar la subcategoría');
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

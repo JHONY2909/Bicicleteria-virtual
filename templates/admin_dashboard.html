@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Panel de Administración</h2>
+
+<div class="mb-4">
+    <a href="{{ url_for('dashboard.agregar_producto') }}" class="btn btn-primary">Agregar Producto</a>
+    <a href="{{ url_for('dashboard.agregar_categoria') }}" class="btn btn-primary">Agregar Categoría/Subcategoría</a>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">Cerrar Sesión</a>
+</div>
+
+<h3>Estadísticas Generales</h3>
+<div class="mb-4">
+    <p><strong>Total de Productos:</strong> {{ productos|length }}</p>
+    <p><strong>Pedidos Pendientes:</strong> 0</p>
+    <p><strong>Total de Usuarios:</strong> {{ usuarios|length if usuarios else 0 }}</p>
+</div>
+
+<div class="mb-4">
+    <a href="{{ url_for('dashboard.productos') }}" class="btn btn-primary">Ver Productos</a>
+    <a href="{{ url_for('dashboard.usuarios') }}" class="btn btn-primary">Ver Usuarios</a>
+
+</div>
+{% endblock %}

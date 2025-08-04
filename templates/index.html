@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Inicio{% endblock %}
+{% block content %}
+    <div class="text-center">
+        <h1>Bienvenido a la Bicicletería</h1>
+        <p>Explora nuestro catálogo de bicicletas y accesorios de alta calidad.</p>
+        <img src="https://via.placeholder.com/600x300?text=Bicicletas" alt="Bicicletas" class="img-fluid mb-3">
+        <p>¿Ya tienes una cuenta? <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Iniciar Sesión</a></p>
+        <p>¿Nuevo cliente? <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Registrarse</a></p>
+    </div>
+{% endblock %}

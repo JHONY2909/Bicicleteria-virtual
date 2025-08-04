@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Bienvenido a nuestra Bicicletería</h1>
+
+{% if current_user.is_authenticated %}
+    <p>¡Hola, {{ current_user.nombre_usuario }}! Explora nuestro catálogo.</p>
+{% else %}
+    <p>¡Explora nuestro catálogo y regístrate para comprar!</p>
+    <div class="mb-4">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Iniciar Sesión</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Registrarse</a>
+    </div>
+{% endif %}
+
+<h2>Catálogo de Productos</h2>
+<div class="mb-4">
+    <form method="POST" id="filter-form">
+        <div class="mb-3">
+            <label for="category_id" class="form-label">Filtrar por Categoría:</label>
+            <select name="category_id" id="category_id" class="form-select" onchange="this.form.submit()">
+                <option value="">Todas</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category_id == category.id|string %}selected{% endif %}>{{ category.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="subcategory_id" class="form-label">Filtrar por Subcategoría:</label>
+            <select name="subcategory_id" id="subcategory_id" class="form-select" onchange="this.form.submit()">
+                <option value="">Todas</option>
+                {% for subcategory in subcategories %}
+                    {% if selected_category_id and subcategory.categoria_id == selected_category_id|int %}
+                        <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>{{ subcategory.nombre }}</option>
+                    {% elif not selected_category_id %}
+                        <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>{{ subcategory.nombre }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="row">
+    {% if products %}
+        {% for product in products %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    {% if product.url_imagen %}
+                        <img src="{{ product.url_imagen }}" class="card-img-top" alt="{{ product.nombre }}">
+                    {% else %}
+                        <img src="/static/images/placeholder.png" class="card-img-top" alt="Sin imagen">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.nombre }}</h5>
+                        <p class="card-text">Subcategoría: {{ product.subcategoria.nombre if product.subcategoria else 'Sin subcategoría' }}</p>
+                        <p class="card-text">{{ product.descripcion }}</p>
+                        <p class="card-text">Precio: ${{ product.precio }}</p>
+                        <p class="card-text">Stock: {{ product.stock }}</p>
+                        {% if current_user.is_authenticated %}
+                            <form class="add-to-cart-form" data-product-id="{{ product.id }}">
+                                <button type="submit" class="btn btn-primary">Agregar al Carrito</button>
+                            </form>
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary" onclick="alert('Inicia sesión para agregar al carrito')">Agregar al Carrito</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay productos disponibles.</p>
+    {% endif %}
+</div>
+
+<script>
+    document.getElementById('category_id').addEventListener('change', function() {
+        const categoryId = this.value;
+        const subcategorySelect = document.getElementById('subcategory_id');
+        subcategorySelect.innerHTML = '<option value="">Todas</option>';
+        if (categoryId) {
+            fetch(`/subcategories/${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(subcat => {
+                        const option = document.createElement('option');
+                        option.value = subcat.id;
+                        option.textContent = subcat.nombre;
+                        subcategorySelect.appendChild(option);
+                    });
+                });
+        }
+    });
+
+    document.querySelectorAll('.add-to-cart-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = this.getAttribute('data-product-id');
+            fetch(`/cart/add_to_cart/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '{{ url_for('cart.cart') }}';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al agregar al carrito');
+            });
+        });
+    });
+</script>
+{% endblock %}

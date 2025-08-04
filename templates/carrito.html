@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Tu Carrito</h2>
+
+{% if cart_items %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.nombre }}</td>
+                    <td>
+                        <div class="input-group input-group-sm" style="width: 120px;">
+                            <form class="decrease-quantity-form" data-cart-item-id="{{ item.id }}">
+                                <button type="submit" class="btn btn-secondary btn-sm">−</button>
+                            </form>
+                            <input type="text" class="form-control text-center" value="{{ item.quantity }}" readonly style="width: 40px;">
+                            <form class="increase-quantity-form" data-cart-item-id="{{ item.id }}">
+                                <button type="submit" class="btn btn-primary btn-sm">+</button>
+                            </form>
+                        </div>
+                    </td>
+                    <td>${{ item.subtotal }}</td>
+                    <td>
+                        <form class="remove-from-cart-form" data-cart-item-id="{{ item.id }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3"><strong>Total</strong></td>
+                <td><strong>${{ total }}</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Seguir Comprando</a>
+{% else %}
+    <p>Tu carrito está vacío.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Volver al Catálogo</a>
+{% endif %}
+
+<script>
+    document.querySelectorAll('.remove-from-cart-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const cartItemId = this.getAttribute('data-cart-item-id');
+            fetch(`/cart/remove/${cartItemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al eliminar del carrito');
+            });
+        });
+    });
+
+    document.querySelectorAll('.increase-quantity-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const cartItemId = this.getAttribute('data-cart-item-id');
+            fetch(`/cart/increase/${cartItemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar la cantidad');
+            });
+        });
+    });
+
+    document.querySelectorAll('.decrease-quantity-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const cartItemId = this.getAttribute('data-cart-item-id');
+            fetch(`/cart/decrease/${cartItemId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar la cantidad');
+            });
+        });
+    });
+</script>
+{% endblock %}
