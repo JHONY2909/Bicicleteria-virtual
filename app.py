@@ -62,4 +62,5 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=7030)
+    app.run(host='0.0.0.0', port=7030)
+
