@@ -42,7 +42,7 @@ def usuarios():
     usuarios = User.query.all()
     return render_template('usuarios.html', usuarios=usuarios)
 
-@dashboard_bp.route('/admin/categorias')
+@dashboard_bp.route('/admin/categorias', methods=['GET', 'POST'])
 @login_required
 def categorias():
     if current_user.rol != 'administrador':
@@ -55,6 +55,32 @@ def categorias():
     print(f"Subcategorías cargadas: {[s.nombre for s in subcategorias]}")
     if not subcategorias:
         print("Advertencia: No se encontraron subcategorías en la consulta.")
+
+    if request.method == 'POST':
+        if 'nombre_categoria' in request.form:
+            nombre_categoria = request.form['nombre_categoria']
+            nombre_subcategoria = request.form.get('nombre_subcategoria')
+            nueva_categoria = Categoria(nombre=nombre_categoria, descripcion='')
+            db.session.add(nueva_categoria)
+            db.session.flush()
+            if nombre_subcategoria:
+                nueva_subcategoria = Subcategoria(nombre=nombre_subcategoria, categoria_id=nueva_categoria.id)
+                db.session.add(nueva_subcategoria)
+            db.session.commit()
+            flash('Categoría y subcategoría agregadas exitosamente', 'success')
+            return redirect(url_for('dashboard.categorias'))
+        elif 'categoria_id' in request.form and 'nombre_subcategoria' in request.form:
+            categoria_id = request.form['categoria_id']
+            nombre_subcategoria = request.form['nombre_subcategoria']
+            if not categoria_id or not nombre_subcategoria:
+                flash('Por favor, completa todos los campos', 'danger')
+            else:
+                nueva_subcategoria = Subcategoria(nombre=nombre_subcategoria, categoria_id=categoria_id)
+                db.session.add(nueva_subcategoria)
+                db.session.commit()
+                flash('Subcategoría agregada exitosamente', 'success')
+            return redirect(url_for('dashboard.categorias'))
+
     return render_template('agregar_categoria.html', categorias=categorias, subcategorias=subcategorias)
 @dashboard_bp.route('/admin/agregar_producto', methods=['GET', 'POST'])
 @login_required
@@ -229,28 +255,7 @@ def eliminar_subcategoria(subcategoria_id):
         print(f"Error al eliminar la subcategoría: {str(e)}")
         return jsonify({'success': False, 'message': f'Error al eliminar la subcategoría: {str(e)}'}), 500
 
-@dashboard_bp.route('/admin/agregar_categoria', methods=['GET', 'POST'])
-@login_required
-def agregar_categoria():
-    if current_user.rol != 'administrador':
-        flash('Acceso denegado', 'danger')
-        return redirect(url_for('auth.login'))
-    if request.method == 'POST':
-        nombre_categoria = request.form['nombre_categoria']
-        nombre_subcategoria = request.form.get('nombre_subcategoria')
-        
-        nueva_categoria = Categoria(nombre=nombre_categoria, descripcion='')
-        db.session.add(nueva_categoria)
-        db.session.flush()
-        
-        if nombre_subcategoria:  # Crear subcategoría solo si se proporciona
-            nueva_subcategoria = Subcategoria(nombre=nombre_subcategoria, categoria_id=nueva_categoria.id)
-            db.session.add(nueva_subcategoria)
-        db.session.commit()
-        flash('Categoría y subcategoría agregadas exitosamente', 'success')
-        return redirect(url_for('dashboard.categorias'))
-    categorias = Categoria.query.all()  # Para el formulario de subcategorías
-    return render_template('agregar_categoria.html', categorias=categorias)
+
 
 @dashboard_bp.route('/admin/agregar_subcategoria', methods=['POST'])
 @login_required
