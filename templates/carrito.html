@@ -1,85 +1,142 @@
 {% extends 'base.html' %}
+{% block title %}Carrito - Bicicletería{% endblock %}
 {% block content %}
-<h2>Tu Carrito</h2>
 
-{% if cart_items %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody>
+<div class="cart-container">
+    <div class="cart-header">
+        <h2 class="cart-title">
+            <i class="bi bi-cart"></i> Tu Carrito
+        </h2>
+        {% if cart_items %}
+            <div class="cart-count">{{ cart_items|length }} productos</div>
+        {% endif %}
+    </div>
+
+    {% if cart_items %}
+        <div class="cart-table">
+            <div class="cart-table-header">
+                <div class="cart-table-header-row">
+                    <div>Producto</div>
+                    <div>Cantidad</div>
+                    <div>Subtotal</div>
+                    <div>Acción</div>
+                </div>
+            </div>
+            
             {% for item in cart_items %}
-                <tr>
-                    <td>{{ item.product.nombre }}</td>
-                    <td>
-                        <div class="input-group input-group-sm" style="width: 120px;">
-                            <form class="decrease-quantity-form" data-cart-item-id="{{ item.id }}">
-                                <button type="submit" class="btn btn-secondary btn-sm">−</button>
-                            </form>
-                            <input type="text" class="form-control text-center" value="{{ item.quantity }}" readonly style="width: 40px;">
-                            <form class="increase-quantity-form" data-cart-item-id="{{ item.id }}">
-                                <button type="submit" class="btn btn-primary btn-sm">+</button>
-                            </form>
+                <div class="cart-item">
+                    <div class="cart-item-row">
+                        <div class="cart-item-product">
+                            {% if item.product.url_imagen %}
+                                <img src="{{ item.product.url_imagen }}" class="cart-item-image" alt="{{ item.product.nombre }}">
+                            {% else %}
+                                <img src="/static/images/placeholder.png" class="cart-item-image" alt="Sin imagen">
+                            {% endif %}
+                            <div class="cart-item-info">
+                                <h4>{{ item.product.nombre }}</h4>
+                                <p>${{ "%.2f"|format(item.product.precio) }} c/u</p>
+                            </div>
                         </div>
-                    </td>
-                    <td>${{ item.subtotal }}</td>
-                    <td>
-                        <form class="remove-from-cart-form" data-cart-item-id="{{ item.id }}">
-                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
+                        
+                        <div class="quantity-controls">
+                            <button type="button" class="quantity-btn decrease-quantity-btn" data-cart-item-id="{{ item.id }}">
+                                <i class="bi bi-dash"></i>
+                            </button>
+                            <input type="text" class="quantity-input" value="{{ item.quantity }}" readonly>
+                            <button type="button" class="quantity-btn increase-quantity-btn" data-cart-item-id="{{ item.id }}">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="cart-item-price">
+                            ${{ "%.2f"|format(item.subtotal) }}
+                        </div>
+                        
+                        <div>
+                            <button type="button" class="remove-btn" data-cart-item-id="{{ item.id }}">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3"><strong>Total</strong></td>
-                <td><strong>${{ total }}</strong></td>
-            </tr>
-        </tfoot>
-    </table>
-    <a href="{{ url_for('index') }}" class="btn btn-primary">Seguir Comprando</a>
-{% else %}
-    <p>Tu carrito está vacío.</p>
-    <a href="{{ url_for('index') }}" class="btn btn-primary">Volver al Catálogo</a>
-{% endif %}
+        </div>
+        
+        <div class="cart-summary">
+            <div class="cart-summary-row">
+                <span>Subtotal:</span>
+                <span>${{ "%.2f"|format(total) }}</span>
+            </div>
+            <div class="cart-summary-row">
+                <span>Envío:</span>
+                <span>Gratis</span>
+            </div>
+            <div class="cart-summary-row">
+                <span>Total:</span>
+                <span>${{ "%.2f"|format(total) }}</span>
+            </div>
+        </div>
+        
+        <div class="cart-actions">
+            <a href="{{ url_for('index') }}" class="continue-shopping">
+                <i class="bi bi-arrow-left"></i> Seguir Comprando
+            </a>
+            <button type="button" class="checkout-btn">
+                <i class="bi bi-credit-card"></i> Proceder al Pago
+            </button>
+        </div>
+        
+    {% else %}
+        <div class="empty-cart">
+            <div class="empty-cart-icon">
+                <i class="bi bi-cart-x"></i>
+            </div>
+            <h3>Tu carrito está vacío</h3>
+            <p>Agrega algunos productos increíbles a tu carrito</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">
+                <i class="bi bi-shop"></i> Explorar Productos
+            </a>
+        </div>
+    {% endif %}
+</div>
 
 <script>
-    document.querySelectorAll('.remove-from-cart-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
+    // Eliminar del carrito
+    document.querySelectorAll('.remove-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
             const cartItemId = this.getAttribute('data-cart-item-id');
-            fetch(`/cart/remove/${cartItemId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    window.location.reload();
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al eliminar del carrito');
-            });
+            
+            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+                fetch(`/cart/remove/${cartItemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error al eliminar del carrito', 'error');
+                });
+            }
         });
     });
 
-    document.querySelectorAll('.increase-quantity-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
+    // Aumentar cantidad
+    document.querySelectorAll('.increase-quantity-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
             const cartItemId = this.getAttribute('data-cart-item-id');
+            
             fetch(`/cart/increase/${cartItemId}`, {
                 method: 'POST',
                 headers: {
@@ -89,23 +146,25 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    window.location.reload();
+                    showNotification(data.message, 'success');
+                    setTimeout(() => window.location.reload(), 500);
                 } else {
-                    alert(data.message);
+                    showNotification(data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error al actualizar la cantidad');
+                showNotification('Error al actualizar la cantidad', 'error');
             });
         });
     });
 
-    document.querySelectorAll('.decrease-quantity-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
+    // Disminuir cantidad
+    document.querySelectorAll('.decrease-quantity-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
             const cartItemId = this.getAttribute('data-cart-item-id');
+            
             fetch(`/cart/decrease/${cartItemId}`, {
                 method: 'POST',
                 headers: {
@@ -115,17 +174,41 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    window.location.reload();
+                    showNotification(data.message, 'success');
+                    setTimeout(() => window.location.reload(), 500);
                 } else {
-                    alert(data.message);
+                    showNotification(data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error al actualizar la cantidad');
+                showNotification('Error al actualizar la cantidad', 'error');
             });
         });
     });
+
+    // Función para mostrar notificaciones
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.style.minWidth = '300px';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 3000);
+    }
 </script>
+
 {% endblock %}

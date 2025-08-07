@@ -1,23 +1,163 @@
 {% extends 'base.html' %}
+{% block title %}Panel de Administración - Bicicletería{% endblock %}
 {% block content %}
-<h2>Panel de Administración</h2>
 
-<div class="mb-4">
-    <a href="{{ url_for('dashboard.agregar_producto') }}" class="btn btn-primary">Agregar Producto</a>
-    <a href="{{ url_for('dashboard.categorias') }}" class="btn btn-primary">Agregar Categoría/Subcategoría</a>
-    <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary">Cerrar Sesión</a>
+<div class="admin-container">
+    <div class="admin-header">
+        <h1 class="admin-title">
+            <i class="bi bi-gear-fill"></i> Panel de Administración
+        </h1>
+        <p class="admin-subtitle">Gestiona tu bicicletería desde aquí</p>
+    </div>
+
+    <!-- Acciones principales -->
+    <div class="admin-actions">
+        <a href="{{ url_for('dashboard.agregar_producto') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Agregar Producto
+        </a>
+        <a href="{{ url_for('dashboard.categorias') }}" class="btn btn-primary">
+            <i class="bi bi-tags"></i> Gestionar Categorías
+        </a>
+        <a href="{{ url_for('dashboard.productos') }}" class="btn btn-outline">
+            <i class="bi bi-box-seam"></i> Ver Productos
+        </a>
+        <a href="{{ url_for('dashboard.usuarios') }}" class="btn btn-outline">
+            <i class="bi bi-people"></i> Ver Usuarios
+        </a>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <div class="stat-number">{{ productos|length }}</div>
+            <div class="stat-label">Total de Productos</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-cart-check"></i>
+            </div>
+            <div class="stat-number">0</div>
+            <div class="stat-label">Pedidos Pendientes</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-number">{{ usuarios|length if usuarios else 0 }}</div>
+            <div class="stat-label">Total de Usuarios</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stat-number">$0</div>
+            <div class="stat-label">Ventas del Mes</div>
+        </div>
+    </div>
+
+    <!-- Dashboard cards -->
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">
+                    <i class="bi bi-graph-up"></i> Resumen de Ventas
+                </h3>
+            </div>
+            <div class="dashboard-card-body">
+                <p class="text-muted">No hay datos de ventas disponibles aún.</p>
+                <div class="mt-3">
+                    <a href="#" class="btn btn-sm btn-outline">Ver Reportes</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">
+                    <i class="bi bi-exclamation-triangle"></i> Productos con Stock Bajo
+                </h3>
+            </div>
+            <div class="dashboard-card-body">
+                <p class="text-muted">Todos los productos tienen stock suficiente.</p>
+                <div class="mt-3">
+                    <a href="{{ url_for('dashboard.productos') }}" class="btn btn-sm btn-outline">Ver Inventario</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h3 class="dashboard-card-title">
+                    <i class="bi bi-clock-history"></i> Actividad Reciente
+                </h3>
+            </div>
+            <div class="dashboard-card-body">
+                <p class="text-muted">No hay actividad reciente.</p>
+                <div class="mt-3">
+                    <a href="#" class="btn btn-sm btn-outline">Ver Historial</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones adicionales -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <h3 class="form-section-title">
+                <i class="bi bi-tools"></i> Herramientas de Administración
+            </h3>
+        </div>
+        <div class="form-section-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Gestión de Contenido</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="{{ url_for('dashboard.categorias') }}" class="text-primary">
+                                <i class="bi bi-tags"></i> Gestionar Categorías y Subcategorías
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{{ url_for('dashboard.productos') }}" class="text-primary">
+                                <i class="bi bi-box-seam"></i> Administrar Productos
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-primary">
+                                <i class="bi bi-images"></i> Gestionar Imágenes
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h4>Configuración</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="{{ url_for('dashboard.usuarios') }}" class="text-primary">
+                                <i class="bi bi-people"></i> Gestionar Usuarios
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-primary">
+                                <i class="bi bi-gear"></i> Configuración General
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{{ url_for('auth.logout') }}" class="text-danger">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<h3>Estadísticas Generales</h3>
-<div class="mb-4">
-    <p><strong>Total de Productos:</strong> {{ productos|length }}</p>
-    <p><strong>Pedidos Pendientes:</strong> 0</p>
-    <p><strong>Total de Usuarios:</strong> {{ usuarios|length if usuarios else 0 }}</p>
-</div>
-
-<div class="mb-4">
-    <a href="{{ url_for('dashboard.productos') }}" class="btn btn-primary">Ver Productos</a>
-    <a href="{{ url_for('dashboard.usuarios') }}" class="btn btn-primary">Ver Usuarios</a>
-
-</div>
 {% endblock %}

@@ -1,23 +1,209 @@
 {% extends 'base.html' %}
+{% block title %}Agregar Producto - Bicicletería{% endblock %}
 {% block content %}
-<h1>Agregar Nuevo Producto</h1>
-<form method="POST">
-    <label>Nombre:</label><input type="text" name="nombre" required><br>
-    <label>Descripción:</label><input type="text" name="descripcion"><br>
-    <label>Precio:</label><input type="number" step="0.01" name="precio" required><br>
-    <label>Stock:</label><input type="number" name="stock" required><br>
-    <label>URL de la Imagen:</label><input type="text" name="url_imagen"><br>
-    <label>Subcategoría:</label>
-    <select name="subcategoria_id" required>
-        {% for categoria in categorias %}
-            <optgroup label="{{ categoria.nombre }}">
-                {% for subcat in categoria.subcategorias %}
-                    <option value="{{ subcat.id }}">{{ subcat.nombre }}</option>
-                {% endfor %}
-            </optgroup>
-        {% endfor %}
-    </select><br>
-    <button type="submit">Agregar Producto</button>
-</form>
-<a href="{{ url_for('dashboard.admin_panel') }}">Volver</a>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1 class="admin-title">
+            <i class="bi bi-plus-circle"></i> Agregar Nuevo Producto
+        </h1>
+        <p class="admin-subtitle">Completa la información del producto</p>
+    </div>
+
+    <div class="form-section">
+        <div class="form-section-header">
+            <h3 class="form-section-title">
+                <i class="bi bi-box-seam"></i> Información del Producto
+            </h3>
+        </div>
+        <div class="form-section-body">
+            <form method="POST">
+                <div class="product-form-grid">
+                    <div class="form-group">
+                        <label for="nombre" class="form-label">
+                            <i class="bi bi-tag"></i> Nombre del Producto
+                        </label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required 
+                               placeholder="Ej: Bicicleta de Montaña Trek">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="precio" class="form-label">
+                            <i class="bi bi-currency-dollar"></i> Precio
+                        </label>
+                        <input type="number" step="0.01" class="form-control" id="precio" name="precio" required 
+                               placeholder="0.00" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stock" class="form-label">
+                            <i class="bi bi-boxes"></i> Stock Disponible
+                        </label>
+                        <input type="number" class="form-control" id="stock" name="stock" required 
+                               placeholder="0" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subcategoria_id" class="form-label">
+                            <i class="bi bi-tags"></i> Subcategoría
+                        </label>
+                        <select class="form-select" id="subcategoria_id" name="subcategoria_id" required>
+                            <option value="">Selecciona una subcategoría</option>
+                            {% for categoria in categorias %}
+                                <optgroup label="{{ categoria.nombre }}">
+                                    {% for subcat in categoria.subcategorias %}
+                                        <option value="{{ subcat.id }}">{{ subcat.nombre }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion" class="form-label">
+                        <i class="bi bi-card-text"></i> Descripción
+                    </label>
+                    <textarea class="form-textarea" id="descripcion" name="descripcion" rows="4" 
+                              placeholder="Describe las características principales del producto..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="url_imagen" class="form-label">
+                        <i class="bi bi-image"></i> URL de la Imagen
+                    </label>
+                    <input type="url" class="form-control" id="url_imagen" name="url_imagen" 
+                           placeholder="https://ejemplo.com/imagen.jpg">
+                    <small class="form-help">Ingresa la URL completa de la imagen del producto</small>
+                </div>
+
+                <div class="form-row">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle"></i> Agregar Producto
+                    </button>
+                    <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-arrow-left"></i> Volver al Panel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Vista previa del producto -->
+    <div class="form-section">
+        <div class="form-section-header">
+            <h3 class="form-section-title">
+                <i class="bi bi-eye"></i> Vista Previa
+            </h3>
+        </div>
+        <div class="form-section-body">
+            <div class="product-preview" id="productPreview">
+                <div class="product-card" style="max-width: 300px; margin: 0 auto;">
+                    <div class="product-image-container">
+                        <img id="previewImage" src="/static/images/placeholder.png" class="product-image" alt="Vista previa">
+                        <div class="product-badge" id="previewCategory">Categoría</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category" id="previewSubcategory">Subcategoría</div>
+                        <h3 class="product-title" id="previewName">Nombre del producto</h3>
+                        <p class="product-description" id="previewDescription">Descripción del producto...</p>
+                        <div class="product-price" id="previewPrice">$0.00</div>
+                        <div class="product-stock" id="previewStock">Stock: 0 unidades</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Vista previa en tiempo real
+    const nameInput = document.getElementById('nombre');
+    const descriptionInput = document.getElementById('descripcion');
+    const priceInput = document.getElementById('precio');
+    const stockInput = document.getElementById('stock');
+    const imageInput = document.getElementById('url_imagen');
+    const subcategorySelect = document.getElementById('subcategoria_id');
+
+    const previewName = document.getElementById('previewName');
+    const previewDescription = document.getElementById('previewDescription');
+    const previewPrice = document.getElementById('previewPrice');
+    const previewStock = document.getElementById('previewStock');
+    const previewImage = document.getElementById('previewImage');
+    const previewSubcategory = document.getElementById('previewSubcategory');
+    const previewCategory = document.getElementById('previewCategory');
+
+    function updatePreview() {
+        previewName.textContent = nameInput.value || 'Nombre del producto';
+        previewDescription.textContent = descriptionInput.value || 'Descripción del producto...';
+        previewPrice.textContent = '$' + (priceInput.value || '0.00');
+        previewStock.textContent = 'Stock: ' + (stockInput.value || '0') + ' unidades';
+        
+        if (imageInput.value) {
+            previewImage.src = imageInput.value;
+        } else {
+            previewImage.src = '/static/images/placeholder.png';
+        }
+
+        const selectedOption = subcategorySelect.options[subcategorySelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            previewSubcategory.textContent = selectedOption.textContent;
+            previewCategory.textContent = selectedOption.textContent;
+        } else {
+            previewSubcategory.textContent = 'Subcategoría';
+            previewCategory.textContent = 'Categoría';
+        }
+    }
+
+    // Event listeners para actualizar la vista previa
+    nameInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+    priceInput.addEventListener('input', updatePreview);
+    stockInput.addEventListener('input', updatePreview);
+    imageInput.addEventListener('input', updatePreview);
+    subcategorySelect.addEventListener('change', updatePreview);
+
+    // Validación de imagen
+    imageInput.addEventListener('blur', function() {
+        if (this.value) {
+            const img = new Image();
+            img.onload = function() {
+                previewImage.src = imageInput.value;
+            };
+            img.onerror = function() {
+                alert('La URL de la imagen no es válida');
+                previewImage.src = '/static/images/placeholder.png';
+            };
+            img.src = this.value;
+        }
+    });
+
+    // Validación del formulario
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const precio = parseFloat(priceInput.value);
+        const stock = parseInt(stockInput.value);
+
+        if (precio < 0) {
+            e.preventDefault();
+            alert('El precio no puede ser negativo');
+            priceInput.focus();
+            return;
+        }
+
+        if (stock < 0) {
+            e.preventDefault();
+            alert('El stock no puede ser negativo');
+            stockInput.focus();
+            return;
+        }
+
+        if (!subcategorySelect.value) {
+            e.preventDefault();
+            alert('Debes seleccionar una subcategoría');
+            subcategorySelect.focus();
+            return;
+        }
+    });
+</script>
+
 {% endblock %}

@@ -1,160 +1,312 @@
 {% extends 'base.html' %}
+{% block title %}Gestionar Categorías - Bicicletería{% endblock %}
 {% block content %}
-<h2>Gestionar Categorías y Subcategorías</h2>
 
-<div class="mb-4">
-    <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">Volver</a>
+<div class="admin-container">
+    <div class="admin-header">
+        <h1 class="admin-title">
+            <i class="bi bi-tags-fill"></i> Gestionar Categorías y Subcategorías
+        </h1>
+        <p class="admin-subtitle">Organiza tu catálogo de productos</p>
+    </div>
+
+    <div class="admin-actions">
+        <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Panel
+        </a>
+    </div>
+
+    <!-- Agregar Nueva Categoría -->
+    <div class="form-section fade-in">
+        <div class="form-section-header">
+            <h3 class="form-section-title">
+                <i class="bi bi-plus-circle"></i> Agregar Nueva Categoría
+            </h3>
+        </div>
+        <div class="form-section-body">
+            <form method="POST" action="">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre_categoria" class="form-label">
+                            <i class="bi bi-tag"></i> Nombre de la Categoría
+                        </label>
+                        <input type="text" class="form-control" id="nombre_categoria" name="nombre_categoria" required
+                               placeholder="Ej: Bicicletas, Accesorios, Repuestos">
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre_subcategoria" class="form-label">
+                            <i class="bi bi-tags"></i> Subcategoría (Opcional)
+                        </label>
+                        <input type="text" class="form-control" id="nombre_subcategoria" name="nombre_subcategoria"
+                               placeholder="Ej: Montaña, Ruta, Urbana">
+                        <small class="form-help">Si agregas una subcategoría, se creará automáticamente</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Agregar Categoría
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Agregar Subcategoría a Categoría Existente -->
+    <div class="form-section fade-in">
+        <div class="form-section-header">
+            <h3 class="form-section-title">
+                <i class="bi bi-plus-square"></i> Agregar Subcategoría
+            </h3>
+        </div>
+        <div class="form-section-body">
+            <form method="POST" action="{{ url_for('dashboard.agregar_subcategoria') }}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="categoria_id" class="form-label">
+                            <i class="bi bi-list-ul"></i> Seleccionar Categoría
+                        </label>
+                        <select class="form-select" id="categoria_id" name="categoria_id" required>
+                            <option value="">Selecciona una categoría</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre_subcategoria_2" class="form-label">
+                            <i class="bi bi-tag"></i> Nombre de la Subcategoría
+                        </label>
+                        <input type="text" class="form-control" id="nombre_subcategoria_2" name="nombre_subcategoria" required
+                               placeholder="Ej: BMX, Eléctrica, Híbrida">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Agregar Subcategoría
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Categorías -->
+    <div class="admin-table-container fade-in">
+        <div class="admin-table-header">
+            <h3 class="admin-table-title">
+                <i class="bi bi-list"></i> Lista de Categorías
+            </h3>
+        </div>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Subcategorías</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if categorias %}
+                    {% for categoria in categorias %}
+                        <tr>
+                            <td><span class="badge badge-secondary">#{{ categoria.id }}</span></td>
+                            <td>
+                                <strong>{{ categoria.nombre }}</strong>
+                            </td>
+                            <td>
+                                <span class="text-muted">
+                                    {{ categoria.subcategorias|length if categoria.subcategorias else 0 }} subcategorías
+                                </span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <button type="button" class="btn btn-danger btn-table delete-categoria-btn" 
+                                            data-categoria-id="{{ categoria.id }}"
+                                            data-categoria-nombre="{{ categoria.nombre }}">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.5;"></i>
+                            <p>No hay categorías registradas.</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Lista de Subcategorías -->
+    <div class="admin-table-container fade-in">
+        <div class="admin-table-header">
+            <h3 class="admin-table-title">
+                <i class="bi bi-tags"></i> Lista de Subcategorías
+            </h3>
+        </div>
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if subcategorias %}
+                    {% for subcategoria in subcategorias %}
+                        <tr>
+                            <td><span class="badge badge-secondary">#{{ subcategoria.id }}</span></td>
+                            <td>{{ subcategoria.nombre }}</td>
+                            <td>
+                                <span class="badge badge-primary">{{ subcategoria.categoria.nombre }}</span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <button type="button" class="btn btn-danger btn-table delete-subcategoria-btn" 
+                                            data-subcategoria-id="{{ subcategoria.id }}"
+                                            data-subcategoria-nombre="{{ subcategoria.nombre }}">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="empty-state">
+                            <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.5;"></i>
+                            <p>No hay subcategorías registradas.</p>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<h3>Agregar Nueva Categoría</h3>
-<form method="POST" action="">
-    <div class="mb-3">
-        <label for="nombre_categoria" class="form-label">Nombre Categoría:</label>
-        <input type="text" class="form-control" id="nombre_categoria" name="nombre_categoria" required>
-    </div>
-    <div class="mb-3">
-        <label for="nombre_subcategoria" class="form-label">Nombre Subcategoría (opcional):</label>
-        <input type="text" class="form-control" id="nombre_subcategoria" name="nombre_subcategoria">
-    </div>
-    <button type="submit" class="btn btn-primary">Agregar Categoría</button>
-</form>
-
-<h3>Agregar Subcategoría a Categoría Existente</h3>
-<form method="POST" action="{{ url_for('dashboard.agregar_subcategoria') }}">
-    <div class="mb-3">
-        <label for="categoria_id" class="form-label">Seleccionar Categoría:</label>
-        <select class="form-select" id="categoria_id" name="categoria_id" required>
-            <option value="">Selecciona una categoría</option>
-            {% for categoria in categorias %}
-            <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="mb-3">
-        <label for="nombre_subcategoria" class="form-label">Nombre Subcategoría:</label>
-        <input type="text" class="form-control" id="nombre_subcategoria" name="nombre_subcategoria" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Agregar Subcategoría</button>
-</form>
-
-<h3>Lista de Categorías</h3>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if categorias %}
-            {% for categoria in categorias %}
-                <tr>
-                    <td>{{ categoria.id }}</td>
-                    <td>{{ categoria.nombre }}</td>
-                    <td>
-                        <form class="delete-categoria-form" data-categoria-id="{{ categoria.id }}" style="display: inline;">
-                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="3">No hay categorías registradas.</td>
-            </tr>
-        {% endif %}
-    </tbody>
-</table>
-
-<h3>Lista de Subcategorías</h3>
-<p>Debug: Subcategorías recibidas: {{ subcategorias|length }}</p>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if subcategorias %}
-            {% for subcategoria in subcategorias %}
-                <tr>
-                    <td>{{ subcategoria.id }}</td>
-                    <td>{{ subcategoria.nombre }}</td>
-                    <td>{{ subcategoria.categoria.nombre }}</td>
-                    <td>
-                        <form class="delete-subcategoria-form" data-subcategoria-id="{{ subcategoria.id }}" style="display: inline;">
-                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="4">No hay subcategorías registradas.</td>
-            </tr>
-        {% endif %}
-    </tbody>
-</table>
-
 <script>
-    document.querySelectorAll('.delete-categoria-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
+    // Eliminar categoría
+    document.querySelectorAll('.delete-categoria-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
             const categoriaId = this.getAttribute('data-categoria-id');
-            if (confirm('¿Estás seguro de que deseas eliminar esta categoría? Esto eliminará todas sus subcategorías y productos asociados.')) {
-                fetch(`/dashboard/admin/eliminar_categoria/${categoriaId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        window.location.reload();
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al eliminar la categoría');
-                });
-            }
+            const categoriaNombre = this.getAttribute('data-categoria-nombre');
+            
+            showDeleteConfirmation(
+                `¿Estás seguro de que deseas eliminar la categoría "${categoriaNombre}"?`,
+                'Esto eliminará todas sus subcategorías y productos asociados.',
+                () => {
+                    fetch(`/dashboard/admin/eliminar_categoria/${categoriaId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Error al eliminar la categoría', 'error');
+                    });
+                }
+            );
         });
     });
 
-    document.querySelectorAll('.delete-subcategoria-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
+    // Eliminar subcategoría
+    document.querySelectorAll('.delete-subcategoria-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
             const subcategoriaId = this.getAttribute('data-subcategoria-id');
-            if (confirm('¿Estás seguro de que deseas eliminar esta subcategoría? Esto eliminará todos los productos asociados.')) {
-                fetch(`/dashboard/admin/eliminar_subcategoria/${subcategoria_id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        window.location.reload();
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al eliminar la subcategoría');
-                });
-            }
+            const subcategoriaNombre = this.getAttribute('data-subcategoria-nombre');
+            
+            showDeleteConfirmation(
+                `¿Estás seguro de que deseas eliminar la subcategoría "${subcategoriaNombre}"?`,
+                'Esto eliminará todos los productos asociados.',
+                () => {
+                    fetch(`/dashboard/admin/eliminar_subcategoria/${subcategoriaId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            setTimeout(() => window.location.reload(), 1000);
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Error al eliminar la subcategoría', 'error');
+                    });
+                }
+            );
         });
     });
+
+    // Función para mostrar confirmación de eliminación
+    function showDeleteConfirmation(title, message, onConfirm) {
+        const modal = document.createElement('div');
+        modal.className = 'delete-confirmation';
+        modal.innerHTML = `
+            <div class="delete-modal">
+                <h3><i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación</h3>
+                <p><strong>${title}</strong></p>
+                <p class="text-muted">${message}</p>
+                <div class="delete-modal-actions">
+                    <button class="btn btn-secondary" onclick="this.closest('.delete-confirmation').remove()">
+                        <i class="bi bi-x"></i> Cancelar
+                    </button>
+                    <button class="btn btn-danger" onclick="confirmDelete()">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        window.confirmDelete = function() {
+            modal.remove();
+            onConfirm();
+        };
+    }
+
+    // Función para mostrar notificaciones
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.style.minWidth = '300px';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
 </script>
+
 {% endblock %}

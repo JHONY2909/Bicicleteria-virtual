@@ -1,82 +1,193 @@
 {% extends 'base.html' %}
+{% block title %}Catálogo - Bicicletería{% endblock %}
 {% block content %}
-<h1>Bienvenido a nuestra Bicicletería</h1>
 
-{% if current_user.is_authenticated %}
-    <p>¡Hola, {{ current_user.nombre_usuario }}! Explora nuestro catálogo.</p>
-{% else %}
-    <p>¡Explora nuestro catálogo y regístrate para comprar!</p>
-    <div class="mb-4">
-        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Iniciar Sesión</a>
-        <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Registrarse</a>
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-background"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">¡Bienvenido a nuestra Bicicletería!</h1>
+        <p class="hero-subtitle">Descubre los mejores productos para tu bicicleta y vive la aventura sobre ruedas</p>
+        
+        {% if current_user.is_authenticated %}
+            <div class="hero-buttons">
+                <a href="#productos" class="hero-btn hero-btn-primary">
+                    <i class="bi bi-bicycle"></i> Explorar Productos
+                </a>
+                <a href="{{ url_for('cart.cart') }}" class="hero-btn hero-btn-outline">
+                    <i class="bi bi-cart"></i> Ver Carrito
+                </a>
+            </div>
+            <p style="margin-top: 1rem; opacity: 0.8;">¡Hola, {{ current_user.nombre_usuario }}! Explora nuestro catálogo.</p>
+        {% else %}
+            <div class="hero-buttons">
+                <a href="{{ url_for('auth.register') }}" class="hero-btn hero-btn-primary">
+                    <i class="bi bi-person-plus"></i> Registrarse
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="hero-btn hero-btn-outline">
+                    <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                </a>
+            </div>
+            <p style="margin-top: 1rem; opacity: 0.8;">¡Regístrate para comenzar a comprar!</p>
+        {% endif %}
     </div>
-{% endif %}
+</section>
 
-<h2>Catálogo de Productos</h2>
-<div class="mb-4">
-    <form method="POST" id="filter-form">
-        <div class="mb-3">
-            <label for="category_id" class="form-label">Filtrar por Categoría:</label>
-            <select name="category_id" id="category_id" class="form-select" onchange="this.form.submit()">
-                <option value="">Todas</option>
-                {% for category in categories %}
-                    <option value="{{ category.id }}" {% if selected_category_id == category.id|string %}selected{% endif %}>{{ category.nombre }}</option>
-                {% endfor %}
-            </select>
+<!-- Sección de Productos -->
+<section class="products-section" id="productos">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Nuestro Catálogo</h2>
+            <p class="section-subtitle">Encuentra todo lo que necesitas para tu bicicleta en un solo lugar</p>
         </div>
-        <div class="mb-3">
-            <label for="subcategory_id" class="form-label">Filtrar por Subcategoría:</label>
-            <select name="subcategory_id" id="subcategory_id" class="form-select" onchange="this.form.submit()">
-                <option value="">Todas</option>
-                {% for subcategory in subcategories %}
-                    {% if selected_category_id and subcategory.categoria_id == selected_category_id|int %}
-                        <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>{{ subcategory.nombre }}</option>
-                    {% elif not selected_category_id %}
-                        <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>{{ subcategory.nombre }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-        </div>
-    </form>
-</div>
 
-<div class="row">
-    {% if products %}
-        {% for product in products %}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    {% if product.url_imagen %}
-                        <img src="{{ product.url_imagen }}" class="card-img-top" alt="{{ product.nombre }}">
-                    {% else %}
-                        <img src="/static/images/placeholder.png" class="card-img-top" alt="Sin imagen">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.nombre }}</h5>
-                        <p class="card-text">Subcategoría: {{ product.subcategoria.nombre if product.subcategoria else 'Sin subcategoría' }}</p>
-                        <p class="card-text">{{ product.descripcion }}</p>
-                        <p class="card-text">Precio: ${{ product.precio }}</p>
-                        <p class="card-text">Stock: {{ product.stock }}</p>
-                        {% if current_user.is_authenticated %}
-                            <form class="add-to-cart-form" data-product-id="{{ product.id }}">
-                                <button type="submit" class="btn btn-primary">Agregar al Carrito</button>
-                            </form>
-                        {% else %}
-                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary" onclick="alert('Inicia sesión para agregar al carrito')">Agregar al Carrito</a>
+        <!-- Filtros -->
+        <div class="filters-container">
+            <!-- Barra de búsqueda -->
+            <div class="search-container mb-4">
+                <form method="GET" action="{{ url_for('index') }}" class="search-form">
+                    <div class="search-input-group">
+                        <input type="text" name="search" class="search-input" 
+                               placeholder="Buscar productos por nombre, descripción o categoría..." 
+                               value="{{ request.args.get('search', '') }}">
+                        <button type="submit" class="search-btn">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        {% if request.args.get('search') %}
+                            <a href="{{ url_for('index') }}" class="search-clear-btn" title="Limpiar búsqueda">
+                                <i class="bi bi-x"></i>
+                            </a>
                         {% endif %}
                     </div>
-                </div>
+                </form>
+                {% if request.args.get('search') %}
+                    <div class="search-results-info">
+                        <span class="text-muted">
+                            <i class="bi bi-search"></i> 
+                            Resultados para: "<strong>{{ request.args.get('search') }}</strong>"
+                        </span>
+                    </div>
+                {% endif %}
             </div>
-        {% endfor %}
-    {% else %}
-        <p>No hay productos disponibles.</p>
-    {% endif %}
-</div>
+
+            <form method="POST" id="filter-form">
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="category_id" class="filter-label">
+                            <i class="bi bi-funnel"></i> Filtrar por Categoría
+                        </label>
+                        <select name="category_id" id="category_id" class="filter-select" onchange="this.form.submit()">
+                            <option value="">Todas las categorías</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if selected_category_id == category.id|string %}selected{% endif %}>
+                                    {{ category.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="subcategory_id" class="filter-label">
+                            <i class="bi bi-tags"></i> Filtrar por Subcategoría
+                        </label>
+                        <select name="subcategory_id" id="subcategory_id" class="filter-select" onchange="this.form.submit()">
+                            <option value="">Todas las subcategorías</option>
+                            {% for subcategory in subcategories %}
+                                {% if selected_category_id and subcategory.categoria_id == selected_category_id|int %}
+                                    <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>
+                                        {{ subcategory.nombre }}
+                                    </option>
+                                {% elif not selected_category_id %}
+                                    <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>
+                                        {{ subcategory.nombre }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Grid de Productos -->
+        {% if products %}
+            <div class="products-grid">
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            {% if product.url_imagen %}
+                                <img src="{{ product.url_imagen }}" class="product-image" alt="{{ product.nombre }}">
+                            {% else %}
+                                <img src="/static/images/placeholder.png" class="product-image" alt="Sin imagen">
+                            {% endif %}
+                            
+                            {% if product.stock < 10 and product.stock > 0 %}
+                                <div class="product-badge stock-low">¡Últimas unidades!</div>
+                            {% elif product.stock == 0 %}
+                                <div class="product-badge out-of-stock">Sin stock</div>
+                            {% else %}
+                                <div class="product-badge">{{ product.subcategoria.nombre if product.subcategoria else 'Producto' }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="product-info">
+                            <div class="product-category">
+                                {{ product.subcategoria.nombre if product.subcategoria else 'Sin categoría' }}
+                            </div>
+                            <h3 class="product-title">{{ product.nombre }}</h3>
+                            <p class="product-description">{{ product.descripcion }}</p>
+                            <div class="product-price">${{ "%.2f"|format(product.precio) }}</div>
+                            <div class="product-stock {% if product.stock < 10 %}low{% endif %} {% if product.stock == 0 %}out{% endif %}">
+                                {% if product.stock > 0 %}
+                                    Stock: {{ product.stock }} unidades
+                                {% else %}
+                                    Sin stock disponible
+                                {% endif %}
+                            </div>
+                            
+                            <div class="product-actions">
+                                {% if current_user.is_authenticated %}
+                                    <button type="button" class="add-to-cart-btn" 
+                                            data-product-id="{{ product.id }}" 
+                                            {% if product.stock == 0 %}disabled{% endif %}>
+                                        <i class="bi bi-cart-plus"></i>
+                                        {% if product.stock == 0 %}Sin Stock{% else %}Agregar al Carrito{% endif %}
+                                    </button>
+                                {% else %}
+                                    <a href="{{ url_for('auth.login') }}" class="add-to-cart-btn" 
+                                       onclick="alert('Inicia sesión para agregar al carrito')">
+                                        <i class="bi bi-cart-plus"></i> Agregar al Carrito
+                                    </a>
+                                {% endif %}
+                                
+                                <button type="button" class="wishlist-btn" title="Agregar a favoritos">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <h3 class="empty-state-title">No se encontraron productos</h3>
+                <p class="empty-state-description">
+                    Intenta ajustar los filtros o explora otras categorías
+                </p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Ver todos los productos</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
 
 <script>
+    // Manejo de filtros
     document.getElementById('category_id').addEventListener('change', function() {
         const categoryId = this.value;
         const subcategorySelect = document.getElementById('subcategory_id');
-        subcategorySelect.innerHTML = '<option value="">Todas</option>';
+        subcategorySelect.innerHTML = '<option value="">Todas las subcategorías</option>';
+        
         if (categoryId) {
             fetch(`/subcategories/${categoryId}`)
                 .then(response => response.json())
@@ -87,14 +198,24 @@
                         option.textContent = subcat.nombre;
                         subcategorySelect.appendChild(option);
                     });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                 });
         }
     });
 
-    document.querySelectorAll('.add-to-cart-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
+    // Manejo de agregar al carrito
+    document.querySelectorAll('.add-to-cart-btn[data-product-id]').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
             const productId = this.getAttribute('data-product-id');
+            const originalText = this.innerHTML;
+            
+            // Cambiar estado del botón
+            this.disabled = true;
+            this.innerHTML = '<i class="bi bi-hourglass-split"></i> Agregando...';
+            
             fetch(`/cart/add_to_cart/${productId}`, {
                 method: 'POST',
                 headers: {
@@ -104,17 +225,77 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
-                    window.location.href = '{{ url_for('cart.cart') }}';
+                    // Mostrar mensaje de éxito
+                    this.innerHTML = '<i class="bi bi-check-circle"></i> ¡Agregado!';
+                    this.style.background = 'var(--success-color)';
+                    
+                    // Actualizar contador del carrito
+                    const cartCount = document.querySelector('.cart-count');
+                    if (cartCount) {
+                        cartCount.textContent = parseInt(cartCount.textContent) + 1;
+                    }
+                    
+                    // Mostrar notificación
+                    showNotification(data.message, 'success');
+                    
+                    // Restaurar botón después de 2 segundos
+                    setTimeout(() => {
+                        this.disabled = false;
+                        this.innerHTML = originalText;
+                        this.style.background = '';
+                    }, 2000);
                 } else {
-                    alert(data.message);
+                    showNotification(data.message, 'error');
+                    this.disabled = false;
+                    this.innerHTML = originalText;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error al agregar al carrito');
+                showNotification('Error al agregar al carrito', 'error');
+                this.disabled = false;
+                this.innerHTML = originalText;
             });
         });
     });
+
+    // Función para mostrar notificaciones
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.style.minWidth = '300px';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remover después de 5 segundos
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Smooth scroll para el botón "Ver Productos"
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
 </script>
+
 {% endblock %}
