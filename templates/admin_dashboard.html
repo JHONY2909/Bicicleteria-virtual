@@ -106,58 +106,7 @@
         </div>
     </div>
 
-    <!-- Acciones adicionales -->
-    <div class="form-section">
-        <div class="form-section-header">
-            <h3 class="form-section-title">
-                <i class="bi bi-tools"></i> Herramientas de Administración
-            </h3>
-        </div>
-        <div class="form-section-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h4>Gestión de Contenido</h4>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="{{ url_for('dashboard.categorias') }}" class="text-primary">
-                                <i class="bi bi-tags"></i> Gestionar Categorías y Subcategorías
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{{ url_for('dashboard.productos') }}" class="text-primary">
-                                <i class="bi bi-box-seam"></i> Administrar Productos
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="text-primary">
-                                <i class="bi bi-images"></i> Gestionar Imágenes
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-md-6">
-                    <h4>Configuración</h4>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="{{ url_for('dashboard.usuarios') }}" class="text-primary">
-                                <i class="bi bi-people"></i> Gestionar Usuarios
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#" class="text-primary">
-                                <i class="bi bi-gear"></i> Configuración General
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="{{ url_for('auth.logout') }}" class="text-danger">
-                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- eliminando secciones de herramientas de administración y configuración -->
 </div>
 
 {% endblock %}

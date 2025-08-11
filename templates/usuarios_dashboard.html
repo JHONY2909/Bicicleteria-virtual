@@ -6,7 +6,7 @@
     <div class="admin-header">
         <h1 class="admin-title">
             {% if rol == 'cliente' %}
-                <i class="bi bi-person-circle"></i> Panel de Cliente
+                
             {% elif rol == 'vendedor' %}
                 <i class="bi bi-shop"></i> Panel de Vendedor
             {% else %}
@@ -15,7 +15,7 @@
         </h1>
         <p class="admin-subtitle">
             {% if rol == 'cliente' %}
-                Gestiona tus pedidos y explora nuestro catálogo
+        
             {% elif rol == 'vendedor' %}
                 Administra los pedidos y ventas
             {% else %}
@@ -26,41 +26,8 @@
 
     {% if rol == 'cliente' %}
         <div class="flex gap-6">
-            <!-- Sidebar de información del cliente -->
+            <!-- Sidebar simplificado sin perfil ni acciones rápidas -->
             <aside class="hidden md:block w-64 space-y-4">
-                <!-- Información del usuario -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="bi bi-person-circle"></i> Mi Perfil
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="text-center mb-4">
-                            <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-2">
-                                <span class="text-primary-foreground font-bold text-lg">
-                                    {{ current_user.nombre_usuario[0].upper() }}
-                                </span>
-                            </div>
-                            <h4 class="font-semibold">{{ current_user.nombre_usuario }}</h4>
-                            <p class="text-muted text-sm">{{ current_user.correo }}</p>
-                        </div>
-                        
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-sm text-muted">Pedidos:</span>
-                                <span class="font-semibold">{{ pedidos|length }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-sm text-muted">Total gastado:</span>
-                                <span class="font-semibold text-primary">
-                                    ${{ "%.2f"|format(pedidos|sum(attribute='monto_total') if pedidos else 0) }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Pedidos recientes -->
                 <div class="card">
                     <div class="card-header">
@@ -101,23 +68,26 @@
                     </div>
                 </div>
 
-                <!-- Enlaces rápidos -->
+                <!-- Estadísticas del usuario -->
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
-                            <i class="bi bi-lightning"></i> Acciones Rápidas
+                            <i class="bi bi-graph-up"></i> Mis Estadísticas
                         </h3>
                     </div>
-                    <div class="card-body space-y-2">
-                        <a href="{{ url_for('cart.cart') }}" class="btn btn-outline w-full justify-start">
-                            <i class="bi bi-cart"></i> Ver Carrito
-                        </a>
-                        <a href="#" class="btn btn-outline w-full justify-start">
-                            <i class="bi bi-heart"></i> Lista de Deseos
-                        </a>
-                        <a href="#" class="btn btn-outline w-full justify-start">
-                            <i class="bi bi-person-gear"></i> Editar Perfil
-                        </a>
+                    <div class="card-body">
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-sm text-muted">Pedidos:</span>
+                                <span class="font-semibold">{{ pedidos|length }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-muted">Total gastado:</span>
+                                <span class="font-semibold text-primary">
+                                    ${{ "%.2f"|format(pedidos|sum(attribute='monto_total') if pedidos else 0) }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </aside>
@@ -131,8 +101,7 @@
 
                 <!-- Barra de búsqueda -->
                 <div class="search-container">
-                   <form method="GET" action="{{ url_for('dashboard.client_dashboard') }}" class="search-form">
-
+                    <form method="GET" action="{{ url_for('dashboard.client_dashboard') }}" class="search-form">
                         <div class="search-input-group">
                             <input type="text" name="search" class="search-input" 
                                    placeholder="Buscar productos por nombre, descripción o categoría..." 
@@ -141,8 +110,7 @@
                                 <i class="bi bi-search"></i>
                             </button>
                             {% if request.args.get('search') %}
-                              <a href="{{ url_for('dashboard.client_dashboard') }}" class="search-clear-btn" title="Limpiar búsqueda">
-
+                                <a href="{{ url_for('dashboard.client_dashboard') }}" class="search-clear-btn" title="Limpiar búsqueda">
                                     <i class="bi bi-x"></i>
                                 </a>
                             {% endif %}
@@ -263,7 +231,7 @@
                             {% endif %}
                         </p>
                         {% if request.args.get('search') %}
-                            <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-primary">
+                            <a href="{{ url_for('dashboard.client_dashboard') }}" class="btn btn-primary">
                                 <i class="bi bi-arrow-left"></i> Ver todos los productos
                             </a>
                         {% endif %}

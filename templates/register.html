@@ -41,7 +41,13 @@
             <label for="password" class="form-label">
                 <i class="bi bi-lock"></i> Contraseña
             </label>
-            <input type="password" class="form-control" id="password" name="password" required>
+            <!-- agregando input group con botón para mostrar/ocultar contraseña -->
+            <div class="password-input-group">
+                <input type="password" class="form-control" id="password" name="password" required>
+                <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                    <i class="bi bi-eye" id="password-icon"></i>
+                </button>
+            </div>
         </div>
         
         <button type="submit" class="form-submit">
@@ -53,5 +59,21 @@
         <p>¿Ya tienes cuenta? <a href="{{ url_for('auth.login') }}">Inicia sesión aquí</a></p>
     </div>
 </div>
+
+<!-- agregando script para toggle de contraseña -->
+<script>
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(inputId + '-icon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+</script>
 
 {% endblock %}

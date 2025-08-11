@@ -5,6 +5,78 @@
   padding: 0 1rem;
 }
 
+/* Estilos para formularios centrados */
+.form-container-centered {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.form-section-centered {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.admin-actions-centered {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.form-grid-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.form-actions .btn {
+  min-width: 150px;
+}
+
+.product-form,
+.category-form {
+  max-width: 100%;
+}
+
+.preview-section {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+  margin-top: 2rem;
+  border: 1px solid var(--border-color);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.preview-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--dark-color);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
 .admin-header {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
   color: white;
@@ -264,35 +336,57 @@
   .admin-actions {
     flex-direction: column;
   }
-  
+
   .admin-actions .btn {
     min-width: auto;
   }
-  
+
+  .form-container-centered {
+    margin: 1rem;
+    padding: 0;
+  }
+
+  .form-section-centered {
+    margin: 1rem 0;
+  }
+
+  .form-grid-compact {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    min-width: auto;
+  }
+
+  .preview-section {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .product-form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
-  .table-actions {
-    flex-direction: column;
-  }
-  
+
   .admin-table {
     font-size: 0.875rem;
   }
-  
+
   .admin-table th,
   .admin-table td {
     padding: 0.75rem 0.5rem;

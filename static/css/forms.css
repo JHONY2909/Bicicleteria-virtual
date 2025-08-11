@@ -204,13 +204,46 @@
   border: none;
 }
 
+/* Password input group styles */
+.password-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-group .form-control {
+  padding-right: 3rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: var(--transition);
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  color: var(--primary-color);
+  background: var(--light-color);
+}
+
+.password-toggle i {
+  font-size: 1rem;
+}
+
 /* Responsive forms */
 @media (max-width: 768px) {
   .form-container {
     margin: 1rem;
     padding: 1.5rem;
   }
-  
+
   .form-title {
     font-size: 1.5rem;
   }

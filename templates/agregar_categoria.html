@@ -2,7 +2,7 @@
 {% block title %}Gestionar Categorías - Bicicletería{% endblock %}
 {% block content %}
 
-<div class="admin-container">
+<div class="form-container-centered">
     <div class="admin-header">
         <h1 class="admin-title">
             <i class="bi bi-tags-fill"></i> Gestionar Categorías y Subcategorías
@@ -10,22 +10,22 @@
         <p class="admin-subtitle">Organiza tu catálogo de productos</p>
     </div>
 
-    <div class="admin-actions">
+    <div class="admin-actions-centered">
         <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Volver al Panel
         </a>
     </div>
 
     <!-- Agregar Nueva Categoría -->
-    <div class="form-section fade-in">
+    <div class="form-section-centered fade-in">
         <div class="form-section-header">
             <h3 class="form-section-title">
                 <i class="bi bi-plus-circle"></i> Agregar Nueva Categoría
             </h3>
         </div>
         <div class="form-section-body">
-            <form method="POST" action="">
-                <div class="form-row">
+            <form method="POST" action="" class="category-form">
+                <div class="form-grid-compact">
                     <div class="form-group">
                         <label for="nombre_categoria" class="form-label">
                             <i class="bi bi-tag"></i> Nombre de la Categoría
@@ -42,23 +42,25 @@
                         <small class="form-help">Si agregas una subcategoría, se creará automáticamente</small>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Agregar Categoría
-                </button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Agregar Categoría
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
     <!-- Agregar Subcategoría a Categoría Existente -->
-    <div class="form-section fade-in">
+    <div class="form-section-centered fade-in">
         <div class="form-section-header">
             <h3 class="form-section-title">
                 <i class="bi bi-plus-square"></i> Agregar Subcategoría
             </h3>
         </div>
         <div class="form-section-body">
-            <form method="POST" action="{{ url_for('dashboard.agregar_subcategoria') }}">
-                <div class="form-row">
+            <form method="POST" action="{{ url_for('dashboard.agregar_subcategoria') }}" class="category-form">
+                <div class="form-grid-compact">
                     <div class="form-group">
                         <label for="categoria_id" class="form-label">
                             <i class="bi bi-list-ul"></i> Seleccionar Categoría
@@ -78,9 +80,11 @@
                                placeholder="Ej: BMX, Eléctrica, Híbrida">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Agregar Subcategoría
-                </button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Agregar Subcategoría
+                    </button>
+                </div>
             </form>
         </div>
     </div>
