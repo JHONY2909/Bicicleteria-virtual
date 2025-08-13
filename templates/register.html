@@ -41,7 +41,6 @@
             <label for="password" class="form-label">
                 <i class="bi bi-lock"></i> Contraseña
             </label>
-            <!-- agregando input group con botón para mostrar/ocultar contraseña -->
             <div class="password-input-group">
                 <input type="password" class="form-control" id="password" name="password" required>
                 <button type="button" class="password-toggle" onclick="togglePassword('password')">
@@ -55,12 +54,12 @@
         </button>
     </form>
     
-    <div class="form-footer">
+    <!-- Quitando el pie de página que se veía feo -->
+    <div class="form-links">
         <p>¿Ya tienes cuenta? <a href="{{ url_for('auth.login') }}">Inicia sesión aquí</a></p>
     </div>
 </div>
 
-<!-- agregando script para toggle de contraseña -->
 <script>
     function togglePassword(inputId) {
         const input = document.getElementById(inputId);

@@ -140,20 +140,30 @@
   opacity: 0.6;
 }
 
-.form-footer {
+/* Cambiando form-footer por form-links para mejor semántica */
+.form-links {
   text-align: center;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border-color);
 }
 
-.form-footer a {
+.form-links a {
   color: var(--primary-color);
   font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
 }
 
-.form-footer a:hover {
+.form-links a:hover {
   color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+.form-links p {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 0.875rem;
 }
 
 /* Checkbox y radio */

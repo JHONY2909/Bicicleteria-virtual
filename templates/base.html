@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
-    <!-- agregando CSS para modales de perfil y lista de deseos -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modals.css') }}">
     
     <!-- Bootstrap Icons -->
@@ -27,7 +26,7 @@
     <header class="header">
         <div class="container">
             <nav class="navbar">
-                <a class="navbar-brand" href="{{ url_for('index') }}">JhonyBikes</a>
+                <a class="navbar-brand" href="{{ url_for('index') }}">BikeShop</a>
                 
                 <button class="navbar-toggler" onclick="toggleMobileMenu()">
                     <i class="bi bi-list"></i>
@@ -40,7 +39,7 @@
                                 <i class="bi bi-gear"></i> Panel Admin
                             </a></li>
                         {% endif %}
-                        <!-- agregando iconos de lista de deseos, carrito y perfil para usuarios autenticados -->
+                        <!-- iconos para usuarios autenticados -->
                         <li><a class="nav-link" href="#" onclick="toggleWishlist()" title="Lista de Deseos">
                             <i class="bi bi-heart"></i>
                         </a></li>
@@ -51,18 +50,17 @@
                         <li><a class="nav-link" href="#" onclick="toggleProfile()" title="Mi Perfil">
                             <i class="bi bi-person-circle"></i>
                         </a></li>
-                        <li><a class="nav-link" href="{{ url_for('auth.logout') }}">
-                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                        </a></li>
+                        <!-- Quitando el enlace de cerrar sesión del header -->
                     {% else %}
-                        <li><a class="nav-link" href="{{ url_for('auth.login') }}" onclick="alert('Inicia sesión para acceder al carrito')">
-                            <i class="bi bi-cart"></i> Carrito
+                        <!-- iconos para usuarios no autenticados ahora redirigen directamente al login -->
+                        <li><a class="nav-link" href="{{ url_for('auth.login') }}" title="Lista de Deseos">
+                            <i class="bi bi-heart"></i>
                         </a></li>
-                        <li><a class="nav-link" href="{{ url_for('auth.login') }}">
-                            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                        <li><a class="nav-link" href="{{ url_for('auth.login') }}" title="Carrito">
+                            <i class="bi bi-cart"></i>
                         </a></li>
-                        <li><a class="nav-link" href="{{ url_for('auth.register') }}">
-                            <i class="bi bi-person-plus"></i> Registrarse
+                        <li><a class="nav-link" href="#" onclick="toggleGuestProfile()" title="Iniciar Sesión">
+                            <i class="bi bi-person-circle"></i>
                         </a></li>
                     {% endif %}
                 </ul>
@@ -70,7 +68,7 @@
         </div>
     </header>
 
-    <!-- agregando modales para perfil y lista de deseos -->
+    <!-- modales para usuarios autenticados -->
     {% if current_user.is_authenticated %}
         <!-- Modal de Perfil -->
         <div id="profileModal" class="modal">
@@ -96,9 +94,13 @@
                         <button class="btn btn-primary btn-sm">
                             <i class="bi bi-pencil"></i> Editar Perfil
                         </button>
-                        <button class="btn btn-outline btn-sm">
-                            <i class="bi bi-key"></i> Cambiar Contraseña
-                        </button>
+                        <a href="{{ url_for('dashboard.client_dashboard') }}" class="btn btn-outline btn-sm">
+                            <i class="bi bi-speedometer2"></i> Mi Dashboard
+                        </a>
+                        <!-- Agregando cerrar sesión al menú de perfil -->
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                        </a>
                     </div>
                 </div>
             </div>
@@ -116,6 +118,42 @@
                         <i class="bi bi-heart" style="font-size: 3rem; opacity: 0.3;"></i>
                         <p>Tu lista de deseos está vacía</p>
                         <small class="text-muted">Agrega productos que te gusten para verlos aquí</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- modal de perfil para usuarios no autenticados -->
+        <div id="guestProfileModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="bi bi-person-circle"></i> Acceder a tu cuenta</h3>
+                    <button class="modal-close" onclick="toggleGuestProfile()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="guest-profile-content">
+                        <div class="guest-welcome">
+                            <i class="bi bi-person-plus" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                            <h4>¡Únete a BikeShop!</h4>
+                            <p class="text-muted">Crea una cuenta para acceder a todas las funciones</p>
+                        </div>
+                        <div class="guest-actions">
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline">
+                                <i class="bi bi-person-plus"></i> Registrarse
+                            </a>
+                        </div>
+                        <div class="guest-benefits">
+                            <h5>Con tu cuenta podrás:</h5>
+                            <ul>
+                                <li><i class="bi bi-check-circle"></i> Agregar productos al carrito</li>
+                                <li><i class="bi bi-check-circle"></i> Crear tu lista de deseos</li>
+                                <li><i class="bi bi-check-circle"></i> Realizar pedidos</li>
+                                <li><i class="bi bi-check-circle"></i> Ver tu historial de compras</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -146,8 +184,8 @@
                     <!-- Sección de contacto -->
                     <div class="footer-section">
                         <h5>Contáctanos</h5>
-                        <p><i class="bi bi-geo-alt"></i> Calle 123, Ciudad xd </p>
-                        <p><i class="bi bi-telephone"></i> +57 3208381949</p>
+                        <p><i class="bi bi-geo-alt"></i> Calle 123, Ciudad</p>
+                        <p><i class="bi bi-telephone"></i> +57 300 123 4567</p>
                         <p><i class="bi bi-envelope"></i> contacto@bicicleteria.com</p>
                     </div>
 
@@ -206,6 +244,13 @@
 
         function toggleWishlist() {
             const modal = document.getElementById('wishlistModal');
+            if (modal) {
+                modal.classList.toggle('show');
+            }
+        }
+
+        function toggleGuestProfile() {
+            const modal = document.getElementById('guestProfileModal');
             if (modal) {
                 modal.classList.toggle('show');
             }

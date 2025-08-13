@@ -131,6 +131,19 @@
   min-width: 120px;
 }
 
+/* Agregando estilos para el botón de cerrar sesión en el modal */
+.profile-actions .btn-danger {
+  background: var(--danger-color);
+  color: white;
+  border: 1px solid var(--danger-color);
+}
+
+.profile-actions .btn-danger:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+}
+
 /* Lista de deseos específico */
 .wishlist-empty {
   text-align: center;
@@ -144,6 +157,77 @@
 }
 
 .wishlist-empty small {
+  font-size: 0.875rem;
+}
+
+/* Estilos para usuarios no autenticados */
+.guest-profile-content {
+  text-align: center;
+}
+
+.guest-welcome {
+  margin-bottom: 1.5rem;
+}
+
+.guest-welcome h4 {
+  margin: 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--dark-color);
+}
+
+.guest-welcome p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.guest-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.guest-actions .btn {
+  flex: 1;
+  min-width: 120px;
+}
+
+.guest-benefits {
+  text-align: left;
+  background: var(--light-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+}
+
+.guest-benefits h5 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--dark-color);
+}
+
+.guest-benefits ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.guest-benefits li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-color);
+}
+
+.guest-benefits li:last-child {
+  margin-bottom: 0;
+}
+
+.guest-benefits li i {
+  color: var(--success-color);
   font-size: 0.875rem;
 }
 
@@ -185,6 +269,15 @@
   }
 
   .profile-actions .btn {
+    min-width: auto;
+  }
+
+  /* Responsive para usuarios no autenticados */
+  .guest-actions {
+    flex-direction: column;
+  }
+
+  .guest-actions .btn {
     min-width: auto;
   }
 }
