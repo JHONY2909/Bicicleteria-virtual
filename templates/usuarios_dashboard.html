@@ -82,7 +82,7 @@
                             </div>
                             {% if pedidos|length > 4 %}
                                 <div class="mt-4 pt-3 border-t">
-                                    <a href="#" class="btn-ver-todos">
+                                    <a href="{{ url_for('dashboard.mis_pedidos') }}" class="btn-ver-todos">
                                         <i class="bi bi-arrow-right"></i> Ver todos mis pedidos
                                     </a>
                                 </div>
@@ -140,7 +140,11 @@
 
                 <!-- Filtros -->
                 <div class="filters-container">
-                    <form method="POST" id="filter-form">
+                    <form method="GET" action="{{ url_for('dashboard.client_dashboard') }}" id="filter-form">
+                        <!-- Preservar parámetro de búsqueda en filtros -->
+                        {% if request.args.get('search') %}
+                            <input type="hidden" name="search" value="{{ request.args.get('search') }}">
+                        {% endif %}
                         <div class="filters-row">
                             <div class="filter-group">
                                 <label for="category_id" class="filter-label">
@@ -246,6 +250,8 @@
                             <a href="{{ url_for('dashboard.client_dashboard') }}" class="btn btn-primary">
                                 <i class="bi bi-arrow-left"></i> Ver todos los productos
                             </a>
+                        {% else %}
+                            <a href="{{ url_for('dashboard.client_dashboard') }}" class="btn btn-primary">Ver todos los productos</a>
                         {% endif %}
                     </div>
                 {% endif %}
@@ -295,12 +301,12 @@
                                 </td>
                                 <td>
                                     <div class="table-actions">
-                                        <button class="btn btn-primary btn-table">
+                                        <a href="{{ url_for('dashboard.pedido_detalle', pedido_id=pedido.id) }}" class="btn btn-primary btn-table">
                                             <i class="bi bi-eye"></i> Ver
-                                        </button>
-                                        <button class="btn btn-success btn-table">
+                                        </a>
+                                        <a href="{{ url_for('dashboard.procesar_pedido', pedido_id=pedido.id) }}" class="btn btn-success btn-table">
                                             <i class="bi bi-check"></i> Procesar
-                                        </button>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

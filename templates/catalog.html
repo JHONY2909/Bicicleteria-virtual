@@ -45,7 +45,7 @@
         <div class="filters-container">
             <!-- Barra de búsqueda -->
             <div class="search-container mb-4">
-                <form method="GET" action="{{ url_for('index') }}" class="search-form">
+                <form method="GET" action="{{ url_for('products.catalog') }}" class="search-form">
                     <div class="search-input-group">
                         <input type="text" name="search" class="search-input" 
                                placeholder="Buscar productos por nombre, descripción o categoría..." 
@@ -54,7 +54,7 @@
                             <i class="bi bi-search"></i>
                         </button>
                         {% if request.args.get('search') %}
-                            <a href="{{ url_for('index') }}" class="search-clear-btn" title="Limpiar búsqueda">
+                            <a href="{{ url_for('products.catalog') }}" class="search-clear-btn" title="Limpiar búsqueda">
                                 <i class="bi bi-x"></i>
                             </a>
                         {% endif %}
@@ -70,7 +70,11 @@
                 {% endif %}
             </div>
 
-            <form method="POST" id="filter-form">
+            <form method="GET" action="{{ url_for('products.catalog') }}" id="filter-form">
+                <!-- Preservar parámetro de búsqueda en filtros -->
+                {% if request.args.get('search') %}
+                    <input type="hidden" name="search" value="{{ request.args.get('search') }}">
+                {% endif %}
                 <div class="filters-row">
                     <div class="filter-group">
                         <label for="category_id" class="filter-label">
@@ -173,9 +177,17 @@
                 <div class="empty-state-icon">🔍</div>
                 <h3 class="empty-state-title">No se encontraron productos</h3>
                 <p class="empty-state-description">
-                    Intenta ajustar los filtros o explora otras categorías
+                    {% if request.args.get('search') %}
+                        No encontramos productos que coincidan con tu búsqueda.
+                    {% else %}
+                        Intenta ajustar los filtros o explora otras categorías.
+                    {% endif %}
                 </p>
-                <a href="{{ url_for('index') }}" class="btn btn-primary">Ver todos los productos</a>
+                {% if request.args.get('search') %}
+                    <a href="{{ url_for('products.catalog') }}" class="btn btn-primary">Ver todos los productos</a>
+                {% else %}
+                    <a href="{{ url_for('products.catalog') }}" class="btn btn-primary">Ver todos los productos</a>
+                {% endif %}
             </div>
         {% endif %}
     </div>

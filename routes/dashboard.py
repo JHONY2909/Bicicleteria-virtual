@@ -8,6 +8,7 @@ from models.pedido import Pedido
 from models.cart import Cart
 from extensions import db
 from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -82,6 +83,7 @@ def categorias():
             return redirect(url_for('dashboard.categorias'))
 
     return render_template('agregar_categoria.html', categorias=categorias, subcategorias=subcategorias)
+
 @dashboard_bp.route('/admin/agregar_producto', methods=['GET', 'POST'])
 @login_required
 def agregar_producto():
@@ -285,17 +287,62 @@ def client_dashboard():
     pedidos = Pedido.query.filter_by(usuario_id=current_user.id).all() if current_user.rol == 'cliente' else Pedido.query.filter_by(estado='pendiente').all() if current_user.rol == 'vendedor' else []
     categories = Categoria.query.all()
     subcategories = Subcategoria.query.all()
-    products = Product.query.all() if current_user.rol == 'cliente' else []
-    
-    selected_category_id = request.form.get('category_id') if request.method == 'POST' else None
-    selected_subcategory_id = request.form.get('subcategory_id') if request.method == 'POST' else None
-    if request.method == 'POST':
-        print(f"Received category_id: {selected_category_id}, subcategory_id: {selected_subcategory_id}")
+
+    search_query = request.args.get('search', '').strip() if request.method == 'GET' else request.form.get('search', '').strip()
+    selected_category_id = request.form.get('category_id') if request.method == 'POST' else request.args.get('category_id', '')
+    selected_subcategory_id = request.form.get('subcategory_id') if request.method == 'POST' else request.args.get('subcategory_id', '')
+
+    products = []
+    if current_user.rol == 'cliente':
+        query = Product.query
+
+        # Aplicar filtro de búsqueda
+        if search_query:
+            query = query.filter(or_(
+                Product.nombre.ilike(f'%{search_query}%'),
+                Product.descripcion.ilike(f'%{search_query}%')
+            ))
+
+        # Aplicar filtro de categoría/subcategoría
         if selected_subcategory_id and selected_subcategory_id != "":
-            products = Product.query.filter_by(subcategoria_id=selected_subcategory_id).all()
+            query = query.filter_by(subcategoria_id=selected_subcategoria_id)
         elif selected_category_id and selected_category_id != "":
-            products = Product.query.join(Product.subcategoria).join(Subcategoria.categoria).filter(Categoria.id == selected_category_id).all()
-        else:
-            products = Product.query.all() if current_user.rol == 'cliente' else []
+            query = query.join(Product.subcategoria).join(Subcategoria.categoria).filter(Categoria.id == selected_category_id)
+
+        products = query.all()
     
     return render_template('usuarios_dashboard.html', pedidos=pedidos, products=products, rol=current_user.rol, categories=categories, subcategories=subcategories, selected_category_id=selected_category_id, selected_subcategory_id=selected_subcategory_id)
+
+@dashboard_bp.route('/pedido_detalle/<int:pedido_id>')
+@login_required
+def pedido_detalle(pedido_id):
+    pedido = Pedido.query.get_or_404(pedido_id)
+    if current_user.rol == 'cliente' and pedido.usuario_id != current_user.id:
+        flash('Acceso denegado', 'danger')
+        return redirect(url_for('dashboard.client_dashboard'))
+    return render_template('pedido_detalle.html', pedido=pedido)
+
+@dashboard_bp.route('/procesar_pedido/<int:pedido_id>', methods=['GET', 'POST'])
+@login_required
+def procesar_pedido(pedido_id):
+    if current_user.rol != 'vendedor':
+        flash('Acceso denegado', 'danger')
+        return redirect(url_for('dashboard.client_dashboard'))
+    pedido = Pedido.query.get_or_404(pedido_id)
+    if request.method == 'POST':
+        estado = request.form.get('estado')
+        if estado:
+            pedido.estado = estado
+            db.session.commit()
+            flash('Estado del pedido actualizado', 'success')
+            return redirect(url_for('dashboard.client_dashboard'))
+    return render_template('procesar_pedido.html', pedido=pedido)
+
+@dashboard_bp.route('/mis_pedidos')
+@login_required
+def mis_pedidos():
+    if current_user.rol != 'cliente':
+        flash('Acceso denegado', 'danger')
+        return redirect(url_for('dashboard.client_dashboard'))
+    pedidos = Pedido.query.filter_by(usuario_id=current_user.id).all()
+    return render_template('mis_pedidos.html', pedidos=pedidos)
