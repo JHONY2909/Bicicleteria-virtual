@@ -1,47 +1,186 @@
-{% extends 'base.html' %}
+{% extends 'base_admin.html' %}
 {% block content %}
-<h2>Lista de Productos</h2>
+<div class="admin-panel">
+<div class="admin-container">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-title">
+                <h1>📦 Gestión de Productos</h1>
+                <p>Administra el catálogo de productos</p>
+            </div>
+            <div class="admin-actions">
+                <a href="{{ url_for('dashboard.admin_panel') }}" class="btn-back">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m12 19-7-7 7-7"/>
+                        <path d="M19 12H5"/>
+                    </svg>
+                    Volver al Dashboard
+                </a>
+                <a href="{{ url_for('dashboard.agregar_producto') }}" class="btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14"/>
+                        <path d="M5 12h14"/>
+                    </svg>
+                    Agregar Producto
+                </a>
+            </div>
+        </div>
+    </div>
 
-<div class="mb-4">
-    <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">Volver</a>
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-content">
+                <h3>Total Productos</h3>
+                <div class="stat-number">{{ productos|length }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <h3>En Stock</h3>
+                <div class="stat-number">{{ productos|selectattr('stock', 'gt', 0)|list|length }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-content">
+                <h3>Stock Bajo</h3>
+                <div class="stat-number">{{ productos|selectattr('stock', 'lt', 10)|list|length }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+                <h3>Valor Total</h3>
+                <div class="stat-number">${{ "%.2f"|format(productos|sum(attribute='precio') if productos else 0) }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="admin-table-container">
+        <div class="table-header">
+            <h2>Lista de Productos</h2>
+            <div class="table-filters">
+                <input type="text" id="searchProducts" placeholder="Buscar productos..." class="search-input">
+                <select id="categoryFilter" class="filter-select">
+                    <option value="">Todas las categorías</option>
+                    {% for product in productos %}
+                        <option value="{{ product.subcategoria.nombre }}">{{ product.subcategoria.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="modern-table-wrapper">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Categoría</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in productos %}
+                        <tr>
+                            <td>
+                                <span class="table-id">#{{ product.id }}</span>
+                            </td>
+                            <td>
+                                <div class="product-info">
+                                    <div class="product-image">📦</div>
+                                    <div class="product-details">
+                                        <div class="product-name">{{ product.nombre }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="price">${{ "%.2f"|format(product.precio) }}</span>
+                            </td>
+                            <td>
+                                <span class="stock-badge {% if product.stock < 10 %}stock-low{% elif product.stock == 0 %}stock-out{% else %}stock-good{% endif %}">
+                                    {{ product.stock }} unidades
+                                </span>
+                            </td>
+                            <td>
+                                <span class="category-tag">{{ product.subcategoria.nombre }}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge {% if product.stock > 0 %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if product.stock > 0 %}Disponible{% else %}Agotado{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{{ url_for('dashboard.editar_producto', product_id=product.id) }}" class="btn-action btn-primary">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                        Editar
+                                    </a>
+                                    <button class="btn-action btn-danger delete-product-btn" data-product-id="{{ product.id }}">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M3 6h18"/>
+                                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                        </svg>
+                                        Eliminar
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Stock</th>
-            <th>Subcategoría</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for product in productos %}
-            <tr>
-                <td>{{ product.id }}</td>
-                <td>{{ product.nombre }}</td>
-                <td>{{ product.precio }}</td>
-                <td>{{ product.stock }}</td>
-                <td>{{ product.subcategoria.nombre }}</td>
-                <td>
-                    <a href="{{ url_for('dashboard.editar_producto', product_id=product.id) }}" class="btn btn-primary btn-sm">Editar</a>
-                    <form class="delete-product-form" data-product-id="{{ product.id }}" style="display: inline;">
-                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
 <script>
-    document.querySelectorAll('.delete-product-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
+    // Search functionality
+    document.getElementById('searchProducts').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.modern-table tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Category filter
+    document.getElementById('categoryFilter').addEventListener('change', function(e) {
+        const selectedCategory = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.modern-table tbody tr');
+        
+        rows.forEach(row => {
+            if (selectedCategory === '') {
+                row.style.display = '';
+            } else {
+                const category = row.querySelector('.category-tag').textContent.toLowerCase();
+                row.style.display = category.includes(selectedCategory) ? '' : 'none';
+            }
+        });
+    });
+
+    // Delete product functionality
+    document.querySelectorAll('.delete-product-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
             const productId = this.getAttribute('data-product-id');
-            if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+            const productName = this.closest('tr').querySelector('.product-name').textContent;
+            
+            if (confirm(`¿Estás seguro de que deseas eliminar el producto "${productName}"?`)) {
                 fetch(`/dashboard/admin/eliminar_producto/${productId}`, {
                     method: 'POST',
                     headers: {
@@ -51,8 +190,19 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
-                        window.location.reload();
+                        // Show success message
+                        const successMsg = document.createElement('div');
+                        successMsg.className = 'alert alert-success';
+                        successMsg.textContent = data.message;
+                        document.querySelector('.admin-container').insertBefore(successMsg, document.querySelector('.stats-grid'));
+                        
+                        // Remove the row with animation
+                        const row = this.closest('tr');
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateX(-20px)';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 300);
                     } else {
                         alert(data.message);
                     }

@@ -1,120 +1,177 @@
-{% extends 'base.html' %}
+{% extends 'base_admin.html' %}
 {% block title %}Editar Producto - Bicicletería{% endblock %}
 {% block content %}
 
-<div class="admin-container">
-    <div class="admin-header">
-        <h1 class="admin-title">
-            <i class="bi bi-pencil-square"></i> Editar Producto
-        </h1>
-        <p class="admin-subtitle">Modifica la información del producto</p>
+<div class="admin-panel">
+    <!-- Header mejorado -->
+    <div class="page-header-modern">
+        <div class="page-header-content">
+            <div class="page-header-icon">
+                <i class="bi bi-pencil-square"></i>
+            </div>
+            <div class="page-header-text">
+                <h1 class="page-title">Editar Producto</h1>
+                <p class="page-subtitle">Modifica la información del producto en el catálogo</p>
+            </div>
+        </div>
+        <div class="page-header-actions">
+            <a href="{{ url_for('dashboard.productos') }}" class="btn btn-outline">
+                <i class="bi bi-arrow-left"></i> Volver a Productos
+            </a>
+        </div>
     </div>
 
-    <div class="form-section">
-        <div class="form-section-header">
-            <h3 class="form-section-title">
-                <i class="bi bi-box-seam"></i> Información del Producto
-            </h3>
-        </div>
-        <div class="form-section-body">
-            <form method="POST" action="{{ url_for('dashboard.editar_producto', product_id=product.id) }}">
-                <div class="product-form-grid">
-                    <div class="form-group">
-                        <label for="nombre" class="form-label">
-                            <i class="bi bi-tag"></i> Nombre del Producto
-                        </label>
-                        <input type="text" class="form-control" id="nombre" name="nombre" 
-                               value="{{ product.nombre }}" required>
-                    </div>
+    <div class="edit-product-layout">
+        <!-- Formulario de edición -->
+        <div class="edit-form-container">
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h3 class="form-card-title">
+                        <i class="bi bi-box-seam"></i>
+                        Información del Producto
+                    </h3>
+                    <p class="form-card-subtitle">Actualiza los detalles del producto</p>
+                </div>
+                
+                <div class="form-card-body">
+                    <form method="POST" action="{{ url_for('dashboard.editar_producto', product_id=product.id) }}" id="editProductForm">
+                        <div class="form-grid-2">
+                            <div class="form-group-modern">
+                                <label for="nombre" class="form-label-modern">
+                                    <i class="bi bi-tag"></i>
+                                    Nombre del Producto
+                                </label>
+                                <input type="text" class="form-input-modern" id="nombre" name="nombre" 
+                                       value="{{ product.nombre }}" required 
+                                       placeholder="Ej: Bicicleta de Montaña">
+                                <div class="form-feedback" id="nombreFeedback"></div>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="precio" class="form-label">
-                            <i class="bi bi-currency-dollar"></i> Precio
-                        </label>
-                        <input type="number" step="0.01" class="form-control" id="precio" name="precio" 
-                               value="{{ product.precio }}" required min="0">
-                    </div>
+                            <div class="form-group-modern">
+                                <label for="precio" class="form-label-modern">
+                                    <i class="bi bi-currency-dollar"></i>
+                                    Precio
+                                </label>
+                                <input type="number" step="0.01" class="form-input-modern" id="precio" name="precio" 
+                                       value="{{ product.precio }}" required min="0"
+                                       placeholder="0.00">
+                                <div class="form-feedback" id="precioFeedback"></div>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="stock" class="form-label">
-                            <i class="bi bi-boxes"></i> Stock Disponible
-                        </label>
-                        <input type="number" class="form-control" id="stock" name="stock" 
-                               value="{{ product.stock }}" required min="0">
-                    </div>
+                        <div class="form-grid-2">
+                            <div class="form-group-modern">
+                                <label for="stock" class="form-label-modern">
+                                    <i class="bi bi-boxes"></i>
+                                    Stock Disponible
+                                </label>
+                                <input type="number" class="form-input-modern" id="stock" name="stock" 
+                                       value="{{ product.stock }}" required min="0"
+                                       placeholder="0">
+                                <div class="form-feedback" id="stockFeedback"></div>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="subcategoria_id" class="form-label">
-                            <i class="bi bi-tags"></i> Subcategoría
-                        </label>
-                        <select class="form-select" id="subcategoria_id" name="subcategoria_id" required>
-                            {% for categoria in categorias %}
-                                <optgroup label="{{ categoria.nombre }}">
-                                    {% for subcategoria in categoria.subcategorias %}
-                                        <option value="{{ subcategoria.id }}" 
-                                                {% if subcategoria.id == product.subcategoria_id %}selected{% endif %}>
-                                            {{ subcategoria.nombre }}
-                                        </option>
+                            <div class="form-group-modern">
+                                <label for="subcategoria_id" class="form-label-modern">
+                                    <i class="bi bi-tags"></i>
+                                    Subcategoría
+                                </label>
+                                <select class="form-select-modern" id="subcategoria_id" name="subcategoria_id" required>
+                                    <option value="">Selecciona una subcategoría</option>
+                                    {% for categoria in categorias %}
+                                        <optgroup label="{{ categoria.nombre }}">
+                                            {% for subcategoria in categoria.subcategorias %}
+                                                <option value="{{ subcategoria.id }}" 
+                                                        {% if subcategoria.id == product.subcategoria_id %}selected{% endif %}>
+                                                    {{ subcategoria.nombre }}
+                                                </option>
+                                            {% endfor %}
+                                        </optgroup>
                                     {% endfor %}
-                                </optgroup>
-                            {% endfor %}
-                        </select>
+                                </select>
+                                <div class="form-feedback" id="subcategoriaFeedback"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="descripcion" class="form-label-modern">
+                                <i class="bi bi-card-text"></i>
+                                Descripción
+                            </label>
+                            <textarea class="form-textarea-modern" id="descripcion" name="descripcion" rows="4"
+                                      placeholder="Describe las características principales del producto...">{{ product.descripcion }}</textarea>
+                            <div class="form-feedback" id="descripcionFeedback"></div>
+                        </div>
+
+                        <div class="form-group-modern">
+                            <label for="url_imagen" class="form-label-modern">
+                                <i class="bi bi-image"></i>
+                                URL de la Imagen
+                            </label>
+                            <input type="url" class="form-input-modern" id="url_imagen" name="url_imagen" 
+                                   value="{{ product.url_imagen }}"
+                                   placeholder="https://ejemplo.com/imagen.jpg">
+                            <div class="form-help">Ingresa la URL completa de la imagen del producto</div>
+                            <div class="form-feedback" id="imagenFeedback"></div>
+                        </div>
+
+                        <div class="form-actions-modern">
+                            <button type="submit" class="btn btn-primary-modern">
+                                <i class="bi bi-check-circle"></i>
+                                Guardar Cambios
+                            </button>
+                            <a href="{{ url_for('dashboard.productos') }}" class="btn btn-secondary-modern">
+                                <i class="bi bi-x-circle"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista previa mejorada -->
+        <div class="preview-container">
+            <div class="preview-card">
+                <div class="preview-card-header">
+                    <h3 class="preview-card-title">
+                        <i class="bi bi-eye"></i>
+                        Vista Previa
+                    </h3>
+                    <div class="preview-status" id="previewStatus">
+                        <i class="bi bi-circle-fill"></i>
+                        Actualizando...
                     </div>
                 </div>
-
-                <div class="form-group">
-                    <label for="descripcion" class="form-label">
-                        <i class="bi bi-card-text"></i> Descripción
-                    </label>
-                    <textarea class="form-textarea" id="descripcion" name="descripcion" rows="4">{{ product.descripcion }}</textarea>
-                </div>
-
-                <div class="form-group">
-                    <label for="url_imagen" class="form-label">
-                        <i class="bi bi-image"></i> URL de la Imagen
-                    </label>
-                    <input type="url" class="form-control" id="url_imagen" name="url_imagen" 
-                           value="{{ product.url_imagen }}">
-                    <small class="form-help">Ingresa la URL completa de la imagen del producto</small>
-                </div>
-
-                <div class="form-row">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="bi bi-check-circle"></i> Guardar Cambios
-                    </button>
-                    <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary btn-lg">
-                        <i class="bi bi-x-circle"></i> Cancelar
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Vista previa del producto -->
-    <div class="form-section">
-        <div class="form-section-header">
-            <h3 class="form-section-title">
-                <i class="bi bi-eye"></i> Vista Previa
-            </h3>
-        </div>
-        <div class="form-section-body">
-            <div class="product-preview" id="productPreview">
-                <div class="product-card" style="max-width: 300px; margin: 0 auto;">
-                    <div class="product-image-container">
-                        <img id="previewImage" src="{{ product.url_imagen or '/static/images/placeholder.png' }}" 
-                             class="product-image" alt="Vista previa">
-                        <div class="product-badge" id="previewCategory">
-                            {{ product.subcategoria.nombre if product.subcategoria else 'Categoría' }}
+                
+                <div class="preview-card-body">
+                    <div class="product-preview-modern" id="productPreview">
+                        <div class="preview-product-card">
+                            <div class="preview-product-image-container">
+                                <img id="previewImage" src="{{ product.url_imagen or '/static/images/placeholder.png' }}" 
+                                     class="preview-product-image" alt="Vista previa">
+                                <div class="preview-product-badge" id="previewCategory">
+                                    {{ product.subcategoria.nombre if product.subcategoria else 'Categoría' }}
+                                </div>
+                                <div class="preview-stock-indicator" id="previewStockIndicator">
+                                    <i class="bi bi-boxes"></i>
+                                </div>
+                            </div>
+                            <div class="preview-product-info">
+                                <div class="preview-product-category" id="previewSubcategory">
+                                    {{ product.subcategoria.nombre if product.subcategoria else 'Subcategoría' }}
+                                </div>
+                                <h3 class="preview-product-title" id="previewName">{{ product.nombre }}</h3>
+                                <p class="preview-product-description" id="previewDescription">{{ product.descripcion }}</p>
+                                <div class="preview-product-footer">
+                                    <div class="preview-product-price" id="previewPrice">${{ "%.2f"|format(product.precio) }}</div>
+                                    <div class="preview-product-stock" id="previewStock">
+                                        <i class="bi bi-boxes"></i>
+                                        {{ product.stock }} unidades
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-category" id="previewSubcategory">
-                            {{ product.subcategoria.nombre if product.subcategoria else 'Subcategoría' }}
-                        </div>
-                        <h3 class="product-title" id="previewName">{{ product.nombre }}</h3>
-                        <p class="product-description" id="previewDescription">{{ product.descripcion }}</p>
-                        <div class="product-price" id="previewPrice">${{ "%.2f"|format(product.precio) }}</div>
-                        <div class="product-stock" id="previewStock">Stock: {{ product.stock }} unidades</div>
                     </div>
                 </div>
             </div>
@@ -123,93 +180,175 @@
 </div>
 
 <script>
-    // Vista previa en tiempo real
-    const nameInput = document.getElementById('nombre');
-    const descriptionInput = document.getElementById('descripcion');
-    const priceInput = document.getElementById('precio');
-    const stockInput = document.getElementById('stock');
-    const imageInput = document.getElementById('url_imagen');
-    const subcategorySelect = document.getElementById('subcategoria_id');
+    const form = document.getElementById('editProductForm');
+    const inputs = {
+        nombre: document.getElementById('nombre'),
+        descripcion: document.getElementById('descripcion'),
+        precio: document.getElementById('precio'),
+        stock: document.getElementById('stock'),
+        imagen: document.getElementById('url_imagen'),
+        subcategoria: document.getElementById('subcategoria_id')
+    };
 
-    const previewName = document.getElementById('previewName');
-    const previewDescription = document.getElementById('previewDescription');
-    const previewPrice = document.getElementById('previewPrice');
-    const previewStock = document.getElementById('previewStock');
-    const previewImage = document.getElementById('previewImage');
-    const previewSubcategory = document.getElementById('previewSubcategory');
-    const previewCategory = document.getElementById('previewCategory');
+    const preview = {
+        name: document.getElementById('previewName'),
+        description: document.getElementById('previewDescription'),
+        price: document.getElementById('previewPrice'),
+        stock: document.getElementById('previewStock'),
+        image: document.getElementById('previewImage'),
+        subcategory: document.getElementById('previewSubcategory'),
+        category: document.getElementById('previewCategory'),
+        stockIndicator: document.getElementById('previewStockIndicator'),
+        status: document.getElementById('previewStatus')
+    };
+
+    let updateTimeout;
 
     function updatePreview() {
-        previewName.textContent = nameInput.value || 'Nombre del producto';
-        previewDescription.textContent = descriptionInput.value || 'Descripción del producto...';
-        previewPrice.textContent = '$' + (priceInput.value || '0.00');
-        previewStock.textContent = 'Stock: ' + (stockInput.value || '0') + ' unidades';
-        
-        if (imageInput.value) {
-            previewImage.src = imageInput.value;
-        } else {
-            previewImage.src = '/static/images/placeholder.png';
-        }
+        clearTimeout(updateTimeout);
+        preview.status.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizando...';
+        preview.status.className = 'preview-status updating';
 
-        const selectedOption = subcategorySelect.options[subcategorySelect.selectedIndex];
-        if (selectedOption && selectedOption.value) {
-            previewSubcategory.textContent = selectedOption.textContent;
-            previewCategory.textContent = selectedOption.textContent;
-        } else {
-            previewSubcategory.textContent = 'Subcategoría';
-            previewCategory.textContent = 'Categoría';
-        }
+        updateTimeout = setTimeout(() => {
+            // Actualizar nombre
+            preview.name.textContent = inputs.nombre.value || 'Nombre del producto';
+            
+            // Actualizar descripción
+            preview.description.textContent = inputs.descripcion.value || 'Descripción del producto...';
+            
+            // Actualizar precio
+            const precio = parseFloat(inputs.precio.value) || 0;
+            preview.price.textContent = '$' + precio.toFixed(2);
+            
+            // Actualizar stock
+            const stock = parseInt(inputs.stock.value) || 0;
+            preview.stock.innerHTML = `<i class="bi bi-boxes"></i> ${stock} unidades`;
+            
+            // Actualizar indicador de stock
+            if (stock === 0) {
+                preview.stockIndicator.className = 'preview-stock-indicator out-of-stock';
+                preview.stockIndicator.innerHTML = '<i class="bi bi-x-circle"></i>';
+            } else if (stock < 10) {
+                preview.stockIndicator.className = 'preview-stock-indicator low-stock';
+                preview.stockIndicator.innerHTML = '<i class="bi bi-exclamation-triangle"></i>';
+            } else {
+                preview.stockIndicator.className = 'preview-stock-indicator in-stock';
+                preview.stockIndicator.innerHTML = '<i class="bi bi-check-circle"></i>';
+            }
+            
+            // Actualizar imagen
+            if (inputs.imagen.value) {
+                preview.image.src = inputs.imagen.value;
+            } else {
+                preview.image.src = '/static/images/placeholder.png';
+            }
+
+            // Actualizar subcategoría
+            const selectedOption = inputs.subcategoria.options[inputs.subcategoria.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                preview.subcategory.textContent = selectedOption.textContent;
+                preview.category.textContent = selectedOption.textContent;
+            } else {
+                preview.subcategory.textContent = 'Subcategoría';
+                preview.category.textContent = 'Categoría';
+            }
+
+            preview.status.innerHTML = '<i class="bi bi-check-circle"></i> Actualizado';
+            preview.status.className = 'preview-status updated';
+        }, 300);
     }
 
-    // Event listeners para actualizar la vista previa
-    nameInput.addEventListener('input', updatePreview);
-    descriptionInput.addEventListener('input', updatePreview);
-    priceInput.addEventListener('input', updatePreview);
-    stockInput.addEventListener('input', updatePreview);
-    imageInput.addEventListener('input', updatePreview);
-    subcategorySelect.addEventListener('change', updatePreview);
+    // Event listeners
+    Object.values(inputs).forEach(input => {
+        input.addEventListener('input', updatePreview);
+        input.addEventListener('change', updatePreview);
+    });
 
-    // Validación de imagen
-    imageInput.addEventListener('blur', function() {
+    // Validación de imagen mejorada
+    inputs.imagen.addEventListener('blur', function() {
+        const feedback = document.getElementById('imagenFeedback');
         if (this.value) {
             const img = new Image();
             img.onload = function() {
-                previewImage.src = imageInput.value;
+                feedback.textContent = 'Imagen válida';
+                feedback.className = 'form-feedback success';
+                preview.image.src = inputs.imagen.value;
             };
             img.onerror = function() {
-                alert('La URL de la imagen no es válida');
-                previewImage.src = '/static/images/placeholder.png';
+                feedback.textContent = 'La URL de la imagen no es válida';
+                feedback.className = 'form-feedback error';
+                preview.image.src = '/static/images/placeholder.png';
             };
             img.src = this.value;
+        } else {
+            feedback.textContent = '';
+            feedback.className = 'form-feedback';
         }
     });
 
-    // Validación del formulario
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const precio = parseFloat(priceInput.value);
-        const stock = parseInt(stockInput.value);
+    // Validación del formulario mejorada
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const feedbacks = {};
 
-        if (precio < 0) {
-            e.preventDefault();
-            alert('El precio no puede ser negativo');
-            priceInput.focus();
-            return;
+        // Validar nombre
+        if (!inputs.nombre.value.trim()) {
+            feedbacks.nombre = { message: 'El nombre es requerido', type: 'error' };
+            isValid = false;
+        } else if (inputs.nombre.value.length < 3) {
+            feedbacks.nombre = { message: 'El nombre debe tener al menos 3 caracteres', type: 'error' };
+            isValid = false;
+        } else {
+            feedbacks.nombre = { message: 'Nombre válido', type: 'success' };
         }
 
-        if (stock < 0) {
-            e.preventDefault();
-            alert('El stock no puede ser negativo');
-            stockInput.focus();
-            return;
+        // Validar precio
+        const precio = parseFloat(inputs.precio.value);
+        if (isNaN(precio) || precio < 0) {
+            feedbacks.precio = { message: 'El precio debe ser un número positivo', type: 'error' };
+            isValid = false;
+        } else {
+            feedbacks.precio = { message: 'Precio válido', type: 'success' };
         }
 
-        if (!subcategorySelect.value) {
+        // Validar stock
+        const stock = parseInt(inputs.stock.value);
+        if (isNaN(stock) || stock < 0) {
+            feedbacks.stock = { message: 'El stock debe ser un número positivo', type: 'error' };
+            isValid = false;
+        } else {
+            feedbacks.stock = { message: 'Stock válido', type: 'success' };
+        }
+
+        // Validar subcategoría
+        if (!inputs.subcategoria.value) {
+            feedbacks.subcategoria = { message: 'Debes seleccionar una subcategoría', type: 'error' };
+            isValid = false;
+        } else {
+            feedbacks.subcategoria = { message: 'Subcategoría seleccionada', type: 'success' };
+        }
+
+        // Mostrar feedback
+        Object.keys(feedbacks).forEach(key => {
+            const feedbackElement = document.getElementById(key + 'Feedback');
+            if (feedbackElement) {
+                feedbackElement.textContent = feedbacks[key].message;
+                feedbackElement.className = `form-feedback ${feedbacks[key].type}`;
+            }
+        });
+
+        if (!isValid) {
             e.preventDefault();
-            alert('Debes seleccionar una subcategoría');
-            subcategorySelect.focus();
-            return;
+            // Scroll al primer error
+            const firstError = document.querySelector('.form-feedback.error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
     });
+
+    // Inicializar vista previa
+    updatePreview();
 </script>
 
 {% endblock %}

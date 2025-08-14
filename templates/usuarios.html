@@ -1,52 +1,150 @@
-{% extends 'base.html' %}
+{% extends 'base_admin.html' %}
 {% block content %}
-<h2>Lista de Usuarios</h2>
+<div class="admin-panel">
+<div class="admin-container">
+    <!-- Header Section -->
+    <div class="admin-header">
+        <div class="admin-header-content">
+            <div class="admin-title">
+                <h1>👥 Gestión de Usuarios</h1>
+                <p>Administra los usuarios del sistema</p>
+            </div>
+            <div class="admin-actions">
+                <a href="{{ url_for('dashboard.admin_panel') }}" class="btn-back">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m12 19-7-7 7-7"/>
+                        <path d="M19 12H5"/>
+                    </svg>
+                    Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
 
-<div class="mb-4">
-    <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">Volver</a>
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <h3>Total Usuarios</h3>
+                <div class="stat-number">{{ usuarios|length if usuarios else 0 }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👑</div>
+            <div class="stat-content">
+                <h3>Administradores</h3>
+                <div class="stat-number">{{ usuarios|selectattr('rol', 'equalto', 'admin')|list|length if usuarios else 0 }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🛒</div>
+            <div class="stat-content">
+                <h3>Clientes</h3>
+                <div class="stat-number">{{ usuarios|selectattr('rol', 'equalto', 'cliente')|list|length if usuarios else 0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="admin-table-container">
+        <div class="table-header">
+            <h2>Lista de Usuarios</h2>
+            <div class="table-filters">
+                <input type="text" id="searchUsers" placeholder="Buscar usuarios..." class="search-input">
+            </div>
+        </div>
+        
+        <div class="modern-table-wrapper">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if usuarios %}
+                        {% for user in usuarios %}
+                            <tr>
+                                <td>
+                                    <span class="table-id">#{{ user.id }}</span>
+                                </td>
+                                <td>
+                                    <div class="user-info">
+                                        <div class="user-avatar">{{ user.nombre_usuario[0]|upper }}</div>
+                                        <div class="user-details">
+                                            <div class="user-name">{{ user.nombre_usuario }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="role-badge role-{{ user.rol }}">
+                                        {% if user.rol == 'admin' %}👑 Admin{% else %}🛒 Cliente{% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-active">Activo</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        {% if user.id != current_user.id %}
+                                            <button class="btn-action btn-danger delete-user-btn" data-user-id="{{ user.id }}">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M3 6h18"/>
+                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                                </svg>
+                                                Eliminar
+                                            </button>
+                                        {% else %}
+                                            <span class="text-muted">Usuario actual</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                <div class="empty-content">
+                                    <div class="empty-icon">👥</div>
+                                    <h3>No hay usuarios registrados</h3>
+                                    <p>Los usuarios aparecerán aquí cuando se registren</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 </div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Rol</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if usuarios %}
-            {% for user in usuarios %}
-                <tr>
-                    <td>{{ user.id }}</td>
-                    <td>{{ user.nombre_usuario }}</td>
-                    <td>{{ user.rol }}</td>
-                    <td>
-                        {% if user.id != current_user.id %}
-                            <form class="delete-user-form" data-user-id="{{ user.id }}" style="display: inline;">
-                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                            </form>
-                        {% else %}
-                            <span class="text-muted">No eliminable</span>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="4">No hay usuarios registrados.</td>
-            </tr>
-        {% endif %}
-    </tbody>
-</table>
-
 <script>
-    document.querySelectorAll('.delete-user-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
+    // Search functionality
+    document.getElementById('searchUsers').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.modern-table tbody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Delete user functionality
+    document.querySelectorAll('.delete-user-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
             const userId = this.getAttribute('data-user-id');
-            if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+            const userName = this.closest('tr').querySelector('.user-name').textContent;
+            
+            if (confirm(`¿Estás seguro de que deseas eliminar al usuario "${userName}"?`)) {
                 fetch(`/dashboard/admin/eliminar_usuario/${userId}`, {
                     method: 'POST',
                     headers: {
@@ -56,8 +154,19 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
-                        window.location.reload();
+                        // Show success message
+                        const successMsg = document.createElement('div');
+                        successMsg.className = 'alert alert-success';
+                        successMsg.textContent = data.message;
+                        document.querySelector('.admin-container').insertBefore(successMsg, document.querySelector('.stats-grid'));
+                        
+                        // Remove the row with animation
+                        const row = this.closest('tr');
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateX(-20px)';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 300);
                     } else {
                         alert(data.message);
                     }

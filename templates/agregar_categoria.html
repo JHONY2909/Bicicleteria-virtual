@@ -1,192 +1,247 @@
-{% extends 'base.html' %}
+{% extends 'base_admin.html' %}
 {% block title %}Gestionar Categorías - Bicicletería{% endblock %}
 {% block content %}
 
-<div class="form-container-centered">
-    <div class="admin-header">
-        <h1 class="admin-title">
-            <i class="bi bi-tags-fill"></i> Gestionar Categorías y Subcategorías
-        </h1>
-        <p class="admin-subtitle">Organiza tu catálogo de productos</p>
-    </div>
-
-    <div class="admin-actions-centered">
-        <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Volver al Panel
-        </a>
-    </div>
-
-    <!-- Agregar Nueva Categoría -->
-    <div class="form-section-centered fade-in">
-        <div class="form-section-header">
-            <h3 class="form-section-title">
-                <i class="bi bi-plus-circle"></i> Agregar Nueva Categoría
-            </h3>
-        </div>
-        <div class="form-section-body">
-            <form method="POST" action="" class="category-form">
-                <div class="form-grid-compact">
-                    <div class="form-group">
-                        <label for="nombre_categoria" class="form-label">
-                            <i class="bi bi-tag"></i> Nombre de la Categoría
-                        </label>
-                        <input type="text" class="form-control" id="nombre_categoria" name="nombre_categoria" required
-                               placeholder="Ej: Bicicletas, Accesorios, Repuestos">
+<div class="admin-panel">
+    <div class="admin-content">
+        <!-- Header mejorado -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <div class="page-title-section">
+                    <div class="page-icon">
+                        <i class="bi bi-tags-fill"></i>
                     </div>
-                    <div class="form-group">
-                        <label for="nombre_subcategoria" class="form-label">
-                            <i class="bi bi-tags"></i> Subcategoría (Opcional)
-                        </label>
-                        <input type="text" class="form-control" id="nombre_subcategoria" name="nombre_subcategoria"
-                               placeholder="Ej: Montaña, Ruta, Urbana">
-                        <small class="form-help">Si agregas una subcategoría, se creará automáticamente</small>
+                    <div>
+                        <h1 class="page-title">Gestionar Categorías</h1>
+                        <p class="page-subtitle">Organiza y administra el catálogo de productos</p>
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> Agregar Categoría
-                    </button>
+                <div class="page-actions">
+                    <a href="{{ url_for('dashboard.admin_panel') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver al Panel
+                    </a>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
 
-    <!-- Agregar Subcategoría a Categoría Existente -->
-    <div class="form-section-centered fade-in">
-        <div class="form-section-header">
-            <h3 class="form-section-title">
-                <i class="bi bi-plus-square"></i> Agregar Subcategoría
-            </h3>
-        </div>
-        <div class="form-section-body">
-            <form method="POST" action="{{ url_for('dashboard.agregar_subcategoria') }}" class="category-form">
-                <div class="form-grid-compact">
-                    <div class="form-group">
-                        <label for="categoria_id" class="form-label">
-                            <i class="bi bi-list-ul"></i> Seleccionar Categoría
-                        </label>
-                        <select class="form-select" id="categoria_id" name="categoria_id" required>
-                            <option value="">Selecciona una categoría</option>
-                            {% for categoria in categorias %}
-                                <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
-                            {% endfor %}
-                        </select>
+        <!-- Grid de formularios -->
+        <div class="forms-grid">
+            <!-- Agregar Nueva Categoría -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-icon">
+                        <i class="bi bi-plus-circle"></i>
                     </div>
-                    <div class="form-group">
-                        <label for="nombre_subcategoria_2" class="form-label">
-                            <i class="bi bi-tag"></i> Nombre de la Subcategoría
-                        </label>
-                        <input type="text" class="form-control" id="nombre_subcategoria_2" name="nombre_subcategoria" required
-                               placeholder="Ej: BMX, Eléctrica, Híbrida">
+                    <div>
+                        <h3 class="form-card-title">Nueva Categoría</h3>
+                        <p class="form-card-subtitle">Crear una categoría principal</p>
                     </div>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> Agregar Subcategoría
-                    </button>
+                <div class="form-card-body">
+                    <form method="POST" action="" class="modern-form">
+                        <div class="form-group">
+                            <label for="nombre_categoria" class="form-label">
+                                <i class="bi bi-tag"></i> Nombre de la Categoría
+                            </label>
+                            <input type="text" class="form-control" id="nombre_categoria" name="nombre_categoria" required
+                                   placeholder="Ej: Bicicletas, Accesorios, Repuestos">
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre_subcategoria" class="form-label">
+                                <i class="bi bi-tags"></i> Subcategoría (Opcional)
+                            </label>
+                            <input type="text" class="form-control" id="nombre_subcategoria" name="nombre_subcategoria"
+                                   placeholder="Ej: Montaña, Ruta, Urbana">
+                            <small class="form-help">Si agregas una subcategoría, se creará automáticamente</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="bi bi-check-circle"></i> Crear Categoría
+                        </button>
+                    </form>
                 </div>
-            </form>
-        </div>
-    </div>
+            </div>
 
-    <!-- Lista de Categorías -->
-    <div class="admin-table-container fade-in">
-        <div class="admin-table-header">
-            <h3 class="admin-table-title">
-                <i class="bi bi-list"></i> Lista de Categorías
-            </h3>
+            <!-- Agregar Subcategoría -->
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div class="form-card-icon">
+                        <i class="bi bi-plus-square"></i>
+                    </div>
+                    <div>
+                        <h3 class="form-card-title">Nueva Subcategoría</h3>
+                        <p class="form-card-subtitle">Agregar a categoría existente</p>
+                    </div>
+                </div>
+                <div class="form-card-body">
+                    <form method="POST" action="{{ url_for('dashboard.agregar_subcategoria') }}" class="modern-form">
+                        <div class="form-group">
+                            <label for="categoria_id" class="form-label">
+                                <i class="bi bi-list-ul"></i> Categoría Principal
+                            </label>
+                            <select class="form-select" id="categoria_id" name="categoria_id" required>
+                                <option value="">Selecciona una categoría</option>
+                                {% for categoria in categorias %}
+                                    <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre_subcategoria_2" class="form-label">
+                                <i class="bi bi-tag"></i> Nombre de la Subcategoría
+                            </label>
+                            <input type="text" class="form-control" id="nombre_subcategoria_2" name="nombre_subcategoria" required
+                                   placeholder="Ej: BMX, Eléctrica, Híbrida">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="bi bi-check-circle"></i> Crear Subcategoría
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Subcategorías</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if categorias %}
-                    {% for categoria in categorias %}
-                        <tr>
-                            <td><span class="badge badge-secondary">#{{ categoria.id }}</span></td>
-                            <td>
-                                <strong>{{ categoria.nombre }}</strong>
-                            </td>
-                            <td>
-                                <span class="text-muted">
-                                    {{ categoria.subcategorias|length if categoria.subcategorias else 0 }} subcategorías
-                                </span>
-                            </td>
-                            <td>
-                                <div class="table-actions">
-                                    <button type="button" class="btn btn-danger btn-table delete-categoria-btn" 
-                                            data-categoria-id="{{ categoria.id }}"
-                                            data-categoria-nombre="{{ categoria.nombre }}">
-                                        <i class="bi bi-trash"></i> Eliminar
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4" class="empty-state">
-                            <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.5;"></i>
-                            <p>No hay categorías registradas.</p>
-                        </td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
 
-    <!-- Lista de Subcategorías -->
-    <div class="admin-table-container fade-in">
-        <div class="admin-table-header">
-            <h3 class="admin-table-title">
-                <i class="bi bi-tags"></i> Lista de Subcategorías
-            </h3>
+        <!-- Estadísticas rápidas -->
+        <div class="stats-overview">
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="bi bi-tags"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ categorias|length if categorias else 0 }}</div>
+                    <div class="stat-label">Categorías</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="bi bi-tag"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number">{{ subcategorias|length if subcategorias else 0 }}</div>
+                    <div class="stat-label">Subcategorías</div>
+                </div>
+            </div>
         </div>
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Categoría</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if subcategorias %}
-                    {% for subcategoria in subcategorias %}
-                        <tr>
-                            <td><span class="badge badge-secondary">#{{ subcategoria.id }}</span></td>
-                            <td>{{ subcategoria.nombre }}</td>
-                            <td>
-                                <span class="badge badge-primary">{{ subcategoria.categoria.nombre }}</span>
-                            </td>
-                            <td>
-                                <div class="table-actions">
-                                    <button type="button" class="btn btn-danger btn-table delete-subcategoria-btn" 
-                                            data-subcategoria-id="{{ subcategoria.id }}"
-                                            data-subcategoria-nombre="{{ subcategoria.nombre }}">
-                                        <i class="bi bi-trash"></i> Eliminar
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4" class="empty-state">
-                            <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.5;"></i>
-                            <p>No hay subcategorías registradas.</p>
-                        </td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+
+        <!-- Tablas mejoradas -->
+        <div class="tables-grid">
+            <!-- Lista de Categorías -->
+            <div class="table-card">
+                <div class="table-card-header">
+                    <h3 class="table-card-title">
+                        <i class="bi bi-list"></i> Categorías Principales
+                    </h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Subcategorías</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if categorias %}
+                                {% for categoria in categorias %}
+                                    <tr>
+                                        <td><span class="badge badge-secondary">#{{ categoria.id }}</span></td>
+                                        <td>
+                                            <div class="table-item">
+                                                <div class="table-item-icon">
+                                                    <i class="bi bi-tag-fill"></i>
+                                                </div>
+                                                <strong>{{ categoria.nombre }}</strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="subcategory-count">
+                                                {{ categoria.subcategorias|length if categoria.subcategorias else 0 }} subcategorías
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger btn-sm delete-categoria-btn" 
+                                                    data-categoria-id="{{ categoria.id }}"
+                                                    data-categoria-nombre="{{ categoria.nombre }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="bi bi-inbox"></i>
+                                            <p>No hay categorías registradas</p>
+                                            <small>Crea tu primera categoría usando el formulario de arriba</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Lista de Subcategorías -->
+            <div class="table-card">
+                <div class="table-card-header">
+                    <h3 class="table-card-title">
+                        <i class="bi bi-tags"></i> Subcategorías
+                    </h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if subcategorias %}
+                                {% for subcategoria in subcategorias %}
+                                    <tr>
+                                        <td><span class="badge badge-secondary">#{{ subcategoria.id }}</span></td>
+                                        <td>
+                                            <div class="table-item">
+                                                <div class="table-item-icon">
+                                                    <i class="bi bi-tag"></i>
+                                                </div>
+                                                {{ subcategoria.nombre }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-primary">{{ subcategoria.categoria.nombre }}</span>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger btn-sm delete-subcategoria-btn" 
+                                                    data-subcategoria-id="{{ subcategoria.id }}"
+                                                    data-subcategoria-nombre="{{ subcategoria.nombre }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="empty-state">
+                                        <div class="empty-state-content">
+                                            <i class="bi bi-inbox"></i>
+                                            <p>No hay subcategorías registradas</p>
+                                            <small>Las subcategorías aparecerán aquí una vez creadas</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
