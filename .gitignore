@@ -1,3 +1,26 @@
-echo "venv/" >> .gitignore
-echo "__pycache__/" >> .gitignore
-echo "*.pyc" >> .gitignore
+# Entorno virtual
+venv/
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de migraciones (innecesarios en control de versiones si son locales)
+migrations/__pycache__/
+*.db
+*.sqlite3
+
+# Archivos de configuración sensibles
+.env
+
+# Archivos de logs
+*.log
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/

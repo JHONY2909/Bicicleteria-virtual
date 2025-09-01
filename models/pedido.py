@@ -1,4 +1,3 @@
-from flask_sqlalchemy import SQLAlchemy
 from extensions import db  # Importar db desde extensions.py
 
 class Pedido(db.Model):
@@ -10,4 +9,7 @@ class Pedido(db.Model):
     metodo_pago = db.Column(db.String(20), nullable=False)
     estado = db.Column(db.String(20), default='pendiente')
     fecha_creacion = db.Column(db.DateTime, default=db.func.current_timestamp())
+
     usuario = db.relationship('User', backref='pedidos')
+    detalles = db.relationship('DetallePedido', back_populates='pedido', lazy=True)
+    direccion = db.relationship('Direccion', backref='pedidos')

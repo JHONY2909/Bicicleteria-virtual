@@ -1,8 +1,15 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, jsonify, request
+from flask import Blueprint, render_template, redirect, url_for, flash, jsonify, request, make_response
 from flask_login import login_required, current_user
+from models.detalle_pedido import DetallePedido
+from models.direccion import Direccion
+from models.pedido import Pedido
 from models.cart import Cart
 from models.product import Product
+from reportlab.lib.pagesizes import letter
+from io import BytesIO
 from extensions import db
+from reportlab.pdfgen import canvas
+import datetime
 
 cart_bp = Blueprint('cart', __name__)
 
@@ -49,18 +56,19 @@ def add_to_cart(product_id):
             if product.stock < 1:
                 print(f"No hay suficiente stock para el producto {product_id}")
                 return jsonify({'success': False, 'message': 'No hay suficiente stock disponible'}), 400
-            cart_item = Cart(user_id=current_user.id, product_id=product_id, quantity=1)
+            cart_item = Cart(user_id=current_user.id, product_id=product_id)
             db.session.add(cart_item)
-            print(f"Nuevo item en el carrito: producto {product_id}")
+            print(f"Agregando nuevo ítem al carrito: {product_id}")
         
         db.session.commit()
-        return jsonify({'success': True, 'message': 'Producto agregado al carrito'})
+        print(f"Ítem agregado al carrito: {product_id}")
+        return jsonify({'success': True, 'message': 'Agregado al carrito'})
     except Exception as e:
         db.session.rollback()
         print(f"Error al agregar al carrito: {str(e)}")
         return jsonify({'success': False, 'message': f'Error al agregar al carrito: {str(e)}'}), 500
 
-@cart_bp.route('/remove/<int:cart_item_id>', methods=['POST'])
+@cart_bp.route('/remove_from_cart/<int:cart_item_id>', methods=['POST'])
 @login_required
 def remove_from_cart(cart_item_id):
     try:
@@ -72,7 +80,7 @@ def remove_from_cart(cart_item_id):
         db.session.delete(cart_item)
         db.session.commit()
         print(f"Ítem eliminado del carrito: {cart_item_id}")
-        return jsonify({'success': True, 'message': 'Producto eliminado del carrito'})
+        return jsonify({'success': True, 'message': 'Eliminado del carrito'})
     except Exception as e:
         db.session.rollback()
         print(f"Error al eliminar del carrito: {str(e)}")
@@ -129,3 +137,120 @@ def decrease_quantity(cart_item_id):
 def get_cart_count():
     cart_items = Cart.query.filter_by(user_id=current_user.id).count()
     return jsonify({'count': cart_items})
+
+@cart_bp.route('/checkout', methods=['GET', 'POST'])
+@login_required
+def checkout():
+    if current_user.rol != 'cliente':
+        flash('Acceso denegado', 'danger')
+        return redirect(url_for('dashboard.client_dashboard'))
+    
+    # Obtener carrito
+    cart_items = Cart.query.filter_by(user_id=current_user.id).all()
+    if not cart_items:
+        flash('Carrito vacío', 'warning')
+        return redirect(url_for('cart.cart'))
+    
+    total = sum(Product.query.get(item.product_id).precio * item.quantity for item in cart_items)
+    
+    # Direcciones existentes del usuario
+    direcciones = Direccion.query.filter_by(usuario_id=current_user.id).all()
+    
+    if request.method == 'POST':
+        direccion_id = request.form.get('direccion_id')
+        calle = request.form.get('calle')
+        ciudad = request.form.get('ciudad')
+        codigo_postal = request.form.get('codigo_postal')
+        metodo_pago = request.form.get('metodo_pago')
+        
+        if not direccion_id and (not calle or not ciudad):
+            flash('Debes proporcionar una dirección', 'danger')
+            return render_template('checkout.html', total=total, direcciones=direcciones)
+        
+        # Crear nueva dirección si no se selecciona una existente
+        if not direccion_id:
+            nueva_direccion = Direccion(
+                usuario_id=current_user.id,
+                calle=calle,
+                ciudad=ciudad,
+                codigo_postal=codigo_postal
+            )
+            db.session.add(nueva_direccion)
+            db.session.commit()
+            direccion_id = nueva_direccion.id
+        
+        # Crear pedido
+        pedido = Pedido(
+            usuario_id=current_user.id,
+            direccion_id=direccion_id,
+            monto_total=total,
+            metodo_pago=metodo_pago,
+            estado='pendiente'  # Inicial
+        )
+        db.session.add(pedido)
+        db.session.commit()
+        
+        # Guardar detalles del pedido
+        for item in cart_items:
+            detalle = DetallePedido(
+                pedido_id=pedido.id,
+                product_id=item.product_id,
+                cantidad=item.quantity,
+                precio_unitario=Product.query.get(item.product_id).precio
+            )
+            db.session.add(detalle)
+        db.session.commit()
+        
+        # Simular pago (para Nequi real, ver abajo)
+        if metodo_pago == 'nequi':
+            # Simulación: Cambiar estado a 'pagado'
+            pedido.estado = 'pagado'
+            db.session.commit()
+            flash('Pago simulado con Nequi exitoso', 'success')
+        else:
+            flash('Método de pago no implementado', 'warning')
+        
+        # Vaciar carrito
+        for item in cart_items:
+            db.session.delete(item)
+        db.session.commit()
+        
+        return redirect(url_for('dashboard.mis_pedidos'))
+    
+    return render_template('checkout.html', total=total, direcciones=direcciones)
+
+@cart_bp.route('/descargar_factura/<int:pedido_id>', methods=['GET'])
+@login_required
+def descargar_factura(pedido_id):
+    pedido = Pedido.query.get_or_404(pedido_id)
+    if pedido.usuario_id != current_user.id:
+        flash('Acceso denegado', 'danger')
+        return redirect(url_for('dashboard.mis_pedidos'))
+    
+    # Generar PDF con reportlab
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    
+    # Contenido de la factura (personaliza según necesites)
+    p.drawString(100, height - 100, f"Factura #{pedido.id}")
+    p.drawString(100, height - 120, f"Fecha: {pedido.fecha_creacion.strftime('%d/%m/%Y')}")
+    p.drawString(100, height - 140, f"Cliente: {current_user.nombre_usuario}")
+    p.drawString(100, height - 160, f"Método de Pago: {pedido.metodo_pago}")
+    p.drawString(100, height - 180, f"Monto Total: ${pedido.monto_total}")
+    
+    # Agregar detalles de productos
+    y = height - 220
+    p.drawString(100, y, "Detalles:")
+    y -= 20  # Mover a la siguiente línea para los items
+    for detalle in pedido.detalles:
+        p.drawString(100, y, f"{detalle.producto.nombre} x {detalle.cantidad} - ${detalle.precio_unitario * detalle.cantidad}")
+        y -= 20
+    
+    p.save()
+    buffer.seek(0)
+    
+    response = make_response(buffer.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=factura_{pedido.id}.pdf'
+    return response

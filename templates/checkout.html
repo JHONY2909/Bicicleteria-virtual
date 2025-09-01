@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Checkout - BikeShop{% endblock %}
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h2 class="form-title">Proceder al Pago</h2>
+        <p class="form-subtitle">Total: ${{ "%.2f"|format(total) }}</p>
+    </div>
+    
+    <form method="POST">
+        <!-- Direcciones existentes -->
+        {% if direcciones %}
+        <div class="form-group">
+            <label class="form-label">Seleccionar Dirección</label>
+            <select name="direccion_id" class="form-select">
+                <option value="">Nueva Dirección</option>
+                {% for dir in direcciones %}
+                <option value="{{ dir.id }}">{{ dir.calle }}, {{ dir.ciudad }} ({{ dir.codigo_postal }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        
+        <!-- Nueva dirección -->
+        <div class="form-group">
+            <label class="form-label">Calle</label>
+            <input type="text" name="calle" class="form-control">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Ciudad</label>
+            <input type="text" name="ciudad" class="form-control">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Código Postal</label>
+            <input type="text" name="codigo_postal" class="form-control">
+        </div>
+        
+        <!-- Métodos de pago -->
+        <div class="form-group">
+            <label class="form-label">Método de Pago</label>
+            <select name="metodo_pago" class="form-select">
+                <option value="nequi">Nequi</option>
+                <!-- Agrega otros si quieres -->
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary checkout-btn">Confirmar Pago</button>
+    </form>
+</div>
+{% endblock %}

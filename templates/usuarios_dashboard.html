@@ -18,57 +18,47 @@
     </div>
 
     <div class="container">
-        <div class="orders-section">
-            <div class="section-header">
-                <h2 class="section-title"><i class="fas fa-shopping-bag"></i> Mis Pedidos</h2>
-            </div>
-            <div class="orders-grid">
-                {% if pedidos %}
-                    <div class="orders-list">
-                        {% for pedido in pedidos[:4] %}
-                            <div class="order-card">
-                                <div class="order-header">
-                                    <h3>
-                                        Pedido #{{ pedido.id }}
-                                        <span class="order-date">{{ pedido.fecha_creacion.strftime('%d/%m/%Y') if pedido.fecha_creacion else 'Fecha no disponible' }}</span>
-                                    </h3>
-                                    <p class="order-status badge badge-{{ pedido.estado }}">{{ pedido.estado|title }}</p>
-                                </div>
-                                <div class="order-details">
-                                    <p><strong>Monto:</strong> ${{ "%.2f"|format(pedido.monto_total) }}</p>
-                                    <p><strong>Productos:</strong> {{ pedido.detalles|length if pedido.detalles else 0 }} productos</p>
-                                </div>
-                                <div class="order-actions">
-                                    <a href="{{ url_for('dashboard.pedido_detalle', pedido_id=pedido.id) }}" class="btn btn-primary">Ver detalles</a>
-                                </div>
-                                {% if pedido.detalles %}
-                                    <div class="order-items">
-                                        {% for detalle in pedido.detalles %}
-                                            <div class="order-item">
-                                                <p>{{ detalle.producto.nombre if detalle.producto else 'Producto no disponible' }} x{{ detalle.cantidad }} - ${{ "%.2f"|format(detalle.precio_unitario * detalle.cantidad) }}</p>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
+        <div class="cart-table">
+    <div class="cart-table-header">
+        <h2 class="cart-title">Mis Pedidos</h2>
+        {% if pedidos %}
+            <p class="cart-count">{{ pedidos|length }} pedidos</p>
+        {% endif %}
+    </div>
+    
+    {% if pedidos %}
+        {% for pedido in pedidos[:4] %}
+            <div class="cart-item">
+                <div class="cart-item-row">
+                    <div class="cart-item-product">
+                        <h4>Pedido #{{ pedido.id }}</h4>
+                        <p>{{ pedido.fecha_creacion.strftime('%d/%m/%Y') if pedido.fecha_creacion else 'Fecha no disponible' }}</p>
                     </div>
-                    {% if pedidos|length > 4 %}
-                        <div class="orders-footer">
-                            <a href="{{ url_for('dashboard.mis_pedidos') }}" class="btn btn-primary">Ver todos mis pedidos</a>
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <div class="empty-state">
-                        <i class="fas fa-box-open empty-state-icon"></i>
-                        <h3 class="empty-state-title">No tienes pedidos aún</h3>
-                        <p class="empty-state-description">¡Explora nuestro catálogo y realiza tu primera compra!</p>
-                        <a href="#products" class="btn btn-primary">Explorar productos</a>
+                    <div>{{ pedido.estado|title }}</div>
+                    <div>${{ "%.2f"|format(pedido.monto_total) }}</div>
+                    <div>
+                        <a href="{{ url_for('dashboard.pedido_detalle', pedido_id=pedido.id) }}" class="btn btn-primary">Ver detalles</a>
+                        {% if pedido.estado == 'pagado' %}
+                            <a href="{{ url_for('cart.descargar_factura', pedido_id=pedido.id) }}" class="btn btn-primary">Descargar Factura</a>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
             </div>
+        {% endfor %}
+        {% if pedidos|length > 4 %}
+            <div class="cart-actions">
+                <a href="{{ url_for('dashboard.mis_pedidos') }}" class="btn btn-primary">Ver todos mis pedidos</a>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-cart">
+            <i class="fas fa-shopping-cart empty-cart-icon"></i>
+            <h3>No tienes pedidos aún</h3>
+            <p>¡Explora nuestro catálogo y realiza tu primera compra!</p>
+            <a href="{{ url_for('products.catalog') }}" class="btn btn-primary">Explorar productos</a>
         </div>
-
+    {% endif %}
+</div>
         <div class="products-section" id="products">
             <div class="section-header">
                 <h2 class="section-title">Catálogo de Productos</h2>

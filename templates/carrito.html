@@ -81,9 +81,8 @@
             <a href="{{ url_for('index') }}" class="continue-shopping">
                 <i class="bi bi-arrow-left"></i> Seguir Comprando
             </a>
-            <button type="button" class="checkout-btn">
-                <i class="bi bi-credit-card"></i> Proceder al Pago
-            </button>
+           <!-- ... (resto igual) -->
+<a href="{{ url_for('cart.checkout') }}" class="checkout-btn">Proceder al Pago</a>
         </div>
         
     {% else %}
