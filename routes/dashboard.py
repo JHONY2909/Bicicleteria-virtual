@@ -10,6 +10,8 @@ from extensions import db
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_
 
+from models.wishlist import Wishlist
+
 dashboard_bp = Blueprint('dashboard', __name__)
 
 @dashboard_bp.route('/admin')
@@ -282,17 +284,18 @@ def client_dashboard():
     if current_user.rol not in ['cliente', 'vendedor']:
         flash('Acceso denegado', 'danger')
         return redirect(url_for('auth.login'))
-    print(f"Rendering usuarios_dashboard for user: {current_user.nombre_usuario}, rol: {current_user.rol}")
     
-    pedidos = Pedido.query.filter_by(usuario_id=current_user.id).all() if current_user.rol == 'cliente' else Pedido.query.filter_by(estado='pendiente').all() if current_user.rol == 'vendedor' else []
+    # Corregido: Usar fecha_creacion en lugar de fecha_pedido
+    pedidos = Pedido.query.filter_by(usuario_id=current_user.id).order_by(Pedido.fecha_creacion.desc()).all()
     categories = Categoria.query.all()
     subcategories = Subcategoria.query.all()
-
-    search_query = request.args.get('search', '').strip() if request.method == 'GET' else request.form.get('search', '').strip()
+    
+    search_query = request.form.get('search', '').strip() if request.method == 'POST' else request.args.get('search', '').strip()
     selected_category_id = request.form.get('category_id') if request.method == 'POST' else request.args.get('category_id', '')
     selected_subcategory_id = request.form.get('subcategory_id') if request.method == 'POST' else request.args.get('subcategory_id', '')
 
     products = []
+    favorites = set()  # Set de IDs de productos en wishlist
     if current_user.rol == 'cliente':
         query = Product.query
 
@@ -305,13 +308,20 @@ def client_dashboard():
 
         # Aplicar filtro de categoría/subcategoría
         if selected_subcategory_id and selected_subcategory_id != "":
-            query = query.filter_by(subcategoria_id=selected_subcategoria_id)
+            query = query.filter_by(subcategoria_id=selected_subcategory_id)
         elif selected_category_id and selected_category_id != "":
             query = query.join(Product.subcategoria).join(Subcategoria.categoria).filter(Categoria.id == selected_category_id)
 
         products = query.all()
+        
+        # Obtener IDs de favoritos del usuario
+        wishlist_items = Wishlist.query.filter_by(user_id=current_user.id).all()
+        favorites = {item.product_id for item in wishlist_items}
     
-    return render_template('usuarios_dashboard.html', pedidos=pedidos, products=products, rol=current_user.rol, categories=categories, subcategories=subcategories, selected_category_id=selected_category_id, selected_subcategory_id=selected_subcategory_id)
+    return render_template('usuarios_dashboard.html', pedidos=pedidos, products=products, rol=current_user.rol, 
+                           categories=categories, subcategories=subcategories, 
+                           selected_category_id=selected_category_id, selected_subcategory_id=selected_subcategory_id,
+                           favorites=favorites)
 
 @dashboard_bp.route('/pedido_detalle/<int:pedido_id>')
 @login_required

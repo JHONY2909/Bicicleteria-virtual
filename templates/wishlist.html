@@ -1,0 +1,51 @@
+{% if products %}
+    {% for product in products %}
+        <div class="product-card">
+            <div class="product-image">
+                {% if product.url_imagen %}
+                    <img src="{{ product.url_imagen }}" alt="{{ product.nombre }}" class="card-img-top">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="Placeholder" class="card-img-top">
+                {% endif %}
+            </div>
+
+            <div class="product-info">
+                <div class="product-category">
+                    {{ product.subcategoria.nombre if product.subcategoria else 'Sin categoría' }}
+                </div>
+
+                <h3 class="product-title">{{ product.nombre }}</h3>
+                <p class="product-description">{{ product.descripcion }}</p>
+
+                <div class="product-price">
+                    ${{ "%.2f"|format(product.precio) }}
+                </div>
+
+                <div class="product-stock">
+                    {% if product.stock > 0 %}
+                        Stock: {{ product.stock }} unidades
+                    {% else %}
+                        Sin stock disponible
+                    {% endif %}
+                </div>
+
+                <div class="product-actions">
+                    <button class="btn btn-primary add-to-cart-btn" data-product-id="{{ product.id }}" {% if product.stock == 0 %}disabled{% endif %}>
+                        {% if product.stock == 0 %}Sin Stock{% else %}Agregar al Carrito{% endif %}
+                    </button>
+
+                    <button class="wishlist-btn favorited" data-product-id="{{ product.id }}">
+                        <i class="fas fa-heart"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-state">
+        <i class="fas fa-heart-broken empty-state-icon"></i>
+        <h3 class="empty-state-title">Tu lista de deseos está vacía</h3>
+        <p class="empty-state-description">Agrega productos que te gusten para verlos aquí</p>
+        <a href="{{ url_for('products.catalog') }}" class="btn btn-primary">Explorar Productos</a>
+    </div>
+{% endif %}

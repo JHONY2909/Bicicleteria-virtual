@@ -1,243 +1,176 @@
+
 {% extends 'base.html' %}
 {% block title %}Panel de {{ rol|title }} - Bicicletería{% endblock %}
 {% block content %}
 
 {% if rol == 'cliente' %}
-    <!-- Hero Section para usuarios autenticados -->
-    <section class="hero">
+    <div class="hero">
         <div class="hero-background"></div>
         <div class="hero-content">
             <h1 class="hero-title">¡Bienvenido a nuestra Bicicletería!</h1>
             <p class="hero-subtitle">Descubre los mejores productos para tu bicicleta y vive la aventura sobre ruedas</p>
-            
             <div class="hero-buttons">
-                <a href="#productos" class="hero-btn hero-btn-primary">
-                    <i class="bi bi-bicycle"></i> Explorar Productos
-                </a>
-                <a href="{{ url_for('cart.cart') }}" class="hero-btn hero-btn-outline">
-                    <i class="bi bi-cart"></i> Ver Carrito
-                </a>
+                <a href="#products" class="hero-btn hero-btn-primary"><i class="fas fa-bicycle"></i> Explorar Productos</a>
+                <a href="{{ url_for('cart.cart') }}" class="hero-btn hero-btn-outline"><i class="fas fa-shopping-cart"></i> Ver Carrito</a>
             </div>
-            <p style="margin-top: 1rem; opacity: 0.8;">¡Hola, {{ current_user.nombre_usuario }}! Explora nuestro catálogo.</p>
+            <p>¡Hola, {{ current_user.nombre_usuario }}! Explora nuestro catálogo.</p>
         </div>
-    </section>
+    </div>
 
-    <div class="container py-6">
-        <div class="flex gap-6">
-            <!-- Sidebar simplificado -->
-            <aside class="hidden md:block w-64 space-y-4">
-                <!-- Pedidos recientes mejorados -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="bi bi-bag-check"></i> Mis Pedidos
-                        </h3>
-                    </div>
-                    <div class="card-body">
-                        {% if pedidos %}
-                            <div class="space-y-4">
-                                {% for pedido in pedidos[:4] %}
-                                    <div class="pedido-card">
-                                        <div class="pedido-header">
-                                            <div class="pedido-info">
-                                                <h4 class="pedido-number">Pedido #{{ pedido.id }}</h4>
-                                                <p class="pedido-date">{{ pedido.fecha_pedido.strftime('%d/%m/%Y') if pedido.fecha_pedido else 'Fecha no disponible' }}</p>
+    <div class="container">
+        <div class="orders-section">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-shopping-bag"></i> Mis Pedidos</h2>
+            </div>
+            <div class="orders-grid">
+                {% if pedidos %}
+                    <div class="orders-list">
+                        {% for pedido in pedidos[:4] %}
+                            <div class="order-card">
+                                <div class="order-header">
+                                    <h3>
+                                        Pedido #{{ pedido.id }}
+                                        <span class="order-date">{{ pedido.fecha_creacion.strftime('%d/%m/%Y') if pedido.fecha_creacion else 'Fecha no disponible' }}</span>
+                                    </h3>
+                                    <p class="order-status badge badge-{{ pedido.estado }}">{{ pedido.estado|title }}</p>
+                                </div>
+                                <div class="order-details">
+                                    <p><strong>Monto:</strong> ${{ "%.2f"|format(pedido.monto_total) }}</p>
+                                    <p><strong>Productos:</strong> {{ pedido.detalles|length if pedido.detalles else 0 }} productos</p>
+                                </div>
+                                <div class="order-actions">
+                                    <a href="{{ url_for('dashboard.pedido_detalle', pedido_id=pedido.id) }}" class="btn btn-primary">Ver detalles</a>
+                                </div>
+                                {% if pedido.detalles %}
+                                    <div class="order-items">
+                                        {% for detalle in pedido.detalles %}
+                                            <div class="order-item">
+                                                <p>{{ detalle.producto.nombre if detalle.producto else 'Producto no disponible' }} x{{ detalle.cantidad }} - ${{ "%.2f"|format(detalle.precio_unitario * detalle.cantidad) }}</p>
                                             </div>
-                                            <span class="status-badge status-{{ pedido.estado }}">
-                                                {{ pedido.estado|title }}
-                                            </span>
-                                        </div>
-                                        <div class="pedido-details">
-                                            <div class="pedido-amount">
-                                                <i class="bi bi-currency-dollar"></i>
-                                                <span class="amount">${{ "%.2f"|format(pedido.monto_total) }}</span>
-                                            </div>
-                                            <div class="pedido-items">
-                                                <i class="bi bi-box"></i>
-                                                <span>{{ pedido.detalles|length if pedido.detalles else 0 }} productos</span>
-                                            </div>
-                                        </div>
-                                        <div class="pedido-actions">
-                                            <button class="btn-pedido-detail" onclick="togglePedidoDetail({{ pedido.id }})">
-                                                <i class="bi bi-eye"></i> Ver detalles
-                                            </button>
-                                        </div>
-                                        
-                                        <!-- Detalles expandibles -->
-                                        <div id="pedido-detail-{{ pedido.id }}" class="pedido-detail-expanded" style="display: none;">
-                                            {% if pedido.detalles %}
-                                                <div class="pedido-productos">
-                                                    {% for detalle in pedido.detalles %}
-                                                        <div class="producto-pedido">
-                                                            <span class="producto-nombre">{{ detalle.producto.nombre if detalle.producto else 'Producto no disponible' }}</span>
-                                                            <span class="producto-cantidad">x{{ detalle.cantidad }}</span>
-                                                            <span class="producto-precio">${{ "%.2f"|format(detalle.precio_unitario * detalle.cantidad) }}</span>
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
-                                        </div>
+                                        {% endfor %}
                                     </div>
-                                {% endfor %}
-                            </div>
-                            {% if pedidos|length > 4 %}
-                                <div class="mt-4 pt-3 border-t">
-                                    <a href="{{ url_for('dashboard.mis_pedidos') }}" class="btn-ver-todos">
-                                        <i class="bi bi-arrow-right"></i> Ver todos mis pedidos
-                                    </a>
-                                </div>
-                            {% endif %}
-                        {% else %}
-                            <div class="empty-pedidos">
-                                <div class="empty-icon">
-                                    <i class="bi bi-bag-x"></i>
-                                </div>
-                                <h4>No tienes pedidos aún</h4>
-                                <p>¡Explora nuestro catálogo y realiza tu primera compra!</p>
-                                <a href="#productos" class="btn-primera-compra">
-                                    <i class="bi bi-bicycle"></i> Explorar productos
-                                </a>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Contenido principal -->
-            <main class="flex-1" id="productos">
-                <!-- Centrando el título del catálogo -->
-                <div class="mb-6 text-center">
-                    <h2 class="text-2xl font-bold mb-2">Catálogo de Productos</h2>
-                    <p class="text-muted">Encuentra todo lo que necesitas para tu bicicleta</p>
-                </div>
-
-                <!-- Barra de búsqueda -->
-                <div class="search-container">
-                    <form method="GET" action="{{ url_for('dashboard.client_dashboard') }}" class="search-form">
-                        <div class="search-input-group">
-                            <input type="text" name="search" class="search-input" 
-                                   placeholder="Buscar productos por nombre, descripción o categoría..." 
-                                   value="{{ request.args.get('search', '') }}">
-                            <button type="submit" class="search-btn">
-                                <i class="bi bi-search"></i>
-                            </button>
-                            {% if request.args.get('search') %}
-                                <a href="{{ url_for('dashboard.client_dashboard') }}" class="search-clear-btn" title="Limpiar búsqueda">
-                                    <i class="bi bi-x"></i>
-                                </a>
-                            {% endif %}
-                        </div>
-                    </form>
-                    {% if request.args.get('search') %}
-                        <div class="search-results-info">
-                            <span class="text-muted">
-                                <i class="bi bi-search"></i> 
-                                Resultados para: "<strong>{{ request.args.get('search') }}</strong>"
-                            </span>
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Filtros -->
-                <div class="filters-container">
-                    <form method="GET" action="{{ url_for('dashboard.client_dashboard') }}" id="filter-form">
-                        <!-- Preservar parámetro de búsqueda en filtros -->
-                        {% if request.args.get('search') %}
-                            <input type="hidden" name="search" value="{{ request.args.get('search') }}">
-                        {% endif %}
-                        <div class="filters-row">
-                            <div class="filter-group">
-                                <label for="category_id" class="filter-label">
-                                    <i class="bi bi-funnel"></i> Filtrar por Categoría
-                                </label>
-                                <select name="category_id" id="category_id" class="filter-select" onchange="this.form.submit()">
-                                    <option value="">Todas las categorías</option>
-                                    {% for category in categories %}
-                                        <option value="{{ category.id }}" {% if selected_category_id == category.id|string %}selected{% endif %}>
-                                            {{ category.nombre }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            
-                            <div class="filter-group">
-                                <label for="subcategory_id" class="filter-label">
-                                    <i class="bi bi-tags"></i> Filtrar por Subcategoría
-                                </label>
-                                <select name="subcategory_id" id="subcategory_id" class="filter-select" onchange="this.form.submit()">
-                                    <option value="">Todas las subcategorías</option>
-                                    {% for subcategory in subcategories %}
-                                        {% if selected_category_id and subcategory.categoria_id == selected_category_id|int %}
-                                            <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>
-                                                {{ subcategory.nombre }}
-                                            </option>
-                                        {% elif not selected_category_id %}
-                                            <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>
-                                                {{ subcategory.nombre }}
-                                            </option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Grid de Productos -->
-                {% if products %}
-                    <div class="products-grid">
-                        {% for product in products %}
-                            <div class="product-card">
-                                <div class="product-image-container">
-                                    {% if product.url_imagen %}
-                                        <img src="{{ product.url_imagen }}" class="product-image" alt="{{ product.nombre }}">
-                                    {% else %}
-                                        <img src="/static/images/placeholder.png" class="product-image" alt="Sin imagen">
-                                    {% endif %}
-                                    
-                                    {% if product.stock < 10 and product.stock > 0 %}
-                                        <div class="product-badge stock-low">¡Últimas unidades!</div>
-                                    {% elif product.stock == 0 %}
-                                        <div class="product-badge out-of-stock">Sin stock</div>
-                                    {% else %}
-                                        <div class="product-badge">{{ product.subcategoria.nombre if product.subcategoria else 'Producto' }}</div>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="product-info">
-                                    <div class="product-category">
-                                        {{ product.subcategoria.nombre if product.subcategoria else 'Sin categoría' }}
-                                    </div>
-                                    <h3 class="product-title">{{ product.nombre }}</h3>
-                                    <p class="product-description">{{ product.descripcion }}</p>
-                                    <div class="product-price">${{ "%.2f"|format(product.precio) }}</div>
-                                    <div class="product-stock {% if product.stock < 10 %}low{% endif %} {% if product.stock == 0 %}out{% endif %}">
-                                        {% if product.stock > 0 %}
-                                            Stock: {{ product.stock }} unidades
-                                        {% else %}
-                                            Sin stock disponible
-                                        {% endif %}
-                                    </div>
-                                    
-                                    <div class="product-actions">
-                                        <button type="button" class="add-to-cart-btn" 
-                                                data-product-id="{{ product.id }}" 
-                                                {% if product.stock == 0 %}disabled{% endif %}>
-                                            <i class="bi bi-cart-plus"></i>
-                                            {% if product.stock == 0 %}Sin Stock{% else %}Agregar al Carrito{% endif %}
-                                        </button>
-                                        
-                                        <button type="button" class="wishlist-btn" title="Agregar a favoritos">
-                                            <i class="bi bi-heart"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
+                    {% if pedidos|length > 4 %}
+                        <div class="orders-footer">
+                            <a href="{{ url_for('dashboard.mis_pedidos') }}" class="btn btn-primary">Ver todos mis pedidos</a>
+                        </div>
+                    {% endif %}
                 {% else %}
                     <div class="empty-state">
-                        <div class="empty-state-icon">🔍</div>
+                        <i class="fas fa-box-open empty-state-icon"></i>
+                        <h3 class="empty-state-title">No tienes pedidos aún</h3>
+                        <p class="empty-state-description">¡Explora nuestro catálogo y realiza tu primera compra!</p>
+                        <a href="#products" class="btn btn-primary">Explorar productos</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="products-section" id="products">
+            <div class="section-header">
+                <h2 class="section-title">Catálogo de Productos</h2>
+                <p class="section-subtitle">Encuentra todo lo que necesitas para tu bicicleta</p>
+            </div>
+
+            <div class="search-container">
+                <form class="search-form" method="GET" action="{{ url_for('dashboard.client_dashboard') }}">
+                    <div class="search-input-group">
+                        <input type="text" name="search" class="search-input" placeholder="Busca productos..." value="{{ request.args.get('search', '') }}">
+                        <button type="submit" class="search-btn"><i class="fas fa-search"></i> Buscar</button>
+                        {% if request.args.get('search') %}
+                            <a href="{{ url_for('dashboard.client_dashboard') }}" class="search-clear-btn">×</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+
+            {% if request.args.get('search') %}
+                <div class="search-results-info">
+                    <i class="fas fa-search"></i> Resultados para: "{{ request.args.get('search') }}"
+                </div>
+            {% endif %}
+
+            <div class="filters-container">
+                <form method="POST" action="{{ url_for('dashboard.client_dashboard') }}">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label class="filter-label">Filtrar por Categoría</label>
+                            <select name="category_id" class="filter-select" onchange="updateSubcategories(this)">
+                                <option value="">Todas las categorías</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if selected_category_id == category.id|string %}selected{% endif %}>{{ category.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label">Filtrar por Subcategoría</label>
+                            <select name="subcategory_id" class="filter-select">
+                                <option value="">Todas las subcategorías</option>
+                                {% for subcategory in subcategories %}
+                                    {% if selected_category_id and subcategory.categoria_id == selected_category_id|int %}
+                                        <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>{{ subcategory.nombre }}</option>
+                                    {% elif not selected_category_id %}
+                                        <option value="{{ subcategory.id }}" {% if selected_subcategory_id == subcategory.id|string %}selected{% endif %}>{{ subcategory.nombre }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="products-grid">
+                {% if products %}
+                    {% for product in products %}
+                        <div class="product-card">
+                            {% if product.url_imagen %}
+                                <div class="product-image-container">
+                                    <img src="{{ product.url_imagen }}" alt="{{ product.nombre }}" class="product-image">
+                                </div>
+                            {% else %}
+                                <div class="product-image-container">
+                                    <img src="https://via.placeholder.com/280x200" alt="Placeholder" class="product-image">
+                                </div>
+                            {% endif %}
+                            <div class="product-badge">
+                                {% if product.stock < 10 and product.stock > 0 %}
+                                    ¡Últimas unidades!
+                                {% elif product.stock == 0 %}
+                                    Sin stock
+                                {% else %}
+                                    {{ product.subcategoria.nombre if product.subcategoria else 'Producto' }}
+                                {% endif %}
+                            </div>
+                            <div class="product-info">
+                                <p class="product-category">{{ product.subcategoria.nombre if product.subcategoria else 'Sin categoría' }}</p>
+                                <h3 class="product-title">{{ product.nombre }}</h3>
+                                <p class="product-description">{{ product.descripcion }}</p>
+                                <p class="product-price">${{ "%.2f"|format(product.precio) }}</p>
+                                <p class="product-stock">
+                                    {% if product.stock > 0 %}
+                                        Stock: {{ product.stock }} unidades
+                                    {% else %}
+                                        Sin stock disponible
+                                    {% endif %}
+                                </p>
+                                <div class="product-actions">
+                                    <button class="add-to-cart-btn" {% if product.stock == 0 %}disabled{% endif %} data-product-id="{{ product.id }}">
+                                        {% if product.stock == 0 %}Sin Stock{% else %}Agregar al Carrito{% endif %}
+                                    </button>
+                                    <button class="wishlist-btn {% if product.id in favorites %}favorited{% endif %}" data-product-id="{{ product.id }}">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-box-open empty-state-icon"></i>
                         <h3 class="empty-state-title">No se encontraron productos</h3>
                         <p class="empty-state-description">
                             {% if request.args.get('search') %}
@@ -246,387 +179,50 @@
                                 Intenta ajustar los filtros o explora otras categorías.
                             {% endif %}
                         </p>
-                        {% if request.args.get('search') %}
-                            <a href="{{ url_for('dashboard.client_dashboard') }}" class="btn btn-primary">
-                                <i class="bi bi-arrow-left"></i> Ver todos los productos
-                            </a>
-                        {% else %}
-                            <a href="{{ url_for('dashboard.client_dashboard') }}" class="btn btn-primary">Ver todos los productos</a>
-                        {% endif %}
+                        <a href="{{ url_for('dashboard.client_dashboard') }}" class="btn btn-primary">Ver todos los productos</a>
                     </div>
                 {% endif %}
-            </main>
+            </div>
         </div>
     </div>
-
 {% elif rol == 'vendedor' %}
-    <div class="container py-6">
-        <div class="admin-header">
-            <h1 class="admin-title">
-                <i class="bi bi-shop"></i> Panel de Vendedor
-            </h1>
-            <p class="admin-subtitle">
-                Administra los pedidos y ventas
-            </p>
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Panel de Vendedor</h2>
+            <p class="section-subtitle">Administra los pedidos y ventas</p>
         </div>
-
-        <!-- Panel de Vendedor -->
-        <div class="admin-table-container">
-            <div class="admin-table-header">
-                <h3 class="admin-table-title">
-                    <i class="bi bi-clock-history"></i> Pedidos Pendientes
-                </h3>
+        <div class="orders-section">
+            <div class="orders-table">
+                <div class="table-header">
+                    <div>Pedido</div>
+                    <div>Cliente</div>
+                    <div>Monto</div>
+                    <div>Estado</div>
+                    <div>Acciones</div>
+                </div>
+                {% if pedidos %}
+                    {% for pedido in pedidos %}
+                        <div class="table-row">
+                            <div>#{{ pedido.id }}</div>
+                            <div>{{ pedido.usuario.nombre_usuario }}</div>
+                            <div>${{ "%.2f"|format(pedido.monto_total) }}</div>
+                            <div>
+                                <span class="badge badge-{{ pedido.estado }}">{{ pedido.estado|title }}</span>
+                            </div>
+                            <div>
+                                <a href="{{ url_for('dashboard.pedido_detalle', pedido_id=pedido.id) }}" class="btn btn-primary">Ver</a>
+                                <a href="{{ url_for('dashboard.procesar_pedido', pedido_id=pedido.id) }}" class="btn btn-primary">Procesar</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-box-open empty-state-icon"></i>
+                        <h3 class="empty-state-title">No hay pedidos pendientes.</h3>
+                    </div>
+                {% endif %}
             </div>
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Pedido</th>
-                        <th>Cliente</th>
-                        <th>Monto</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if pedidos %}
-                        {% for pedido in pedidos %}
-                            <tr>
-                                <td><span class="badge badge-secondary">#{{ pedido.id }}</span></td>
-                                <td>{{ pedido.usuario.nombre_usuario }}</td>
-                                <td>${{ "%.2f"|format(pedido.monto_total) }}</td>
-                                <td>
-                                    <span class="status-badge status-{{ pedido.estado }}">
-                                        {{ pedido.estado|title }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="table-actions">
-                                        <a href="{{ url_for('dashboard.pedido_detalle', pedido_id=pedido.id) }}" class="btn btn-primary btn-table">
-                                            <i class="bi bi-eye"></i> Ver
-                                        </a>
-                                        <a href="{{ url_for('dashboard.procesar_pedido', pedido_id=pedido.id) }}" class="btn btn-success btn-table">
-                                            <i class="bi bi-check"></i> Procesar
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="5" class="empty-state">
-                                <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.5;"></i>
-                                <p>No hay pedidos pendientes.</p>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
         </div>
     </div>
 {% endif %}
-
-<style>
-/* Estilos para pedidos mejorados */
-.pedido-card {
-    background: var(--card-background);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 1rem;
-    transition: all 0.3s ease;
-    margin-bottom: 1rem;
-}
-
-.pedido-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.pedido-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 0.75rem;
-}
-
-.pedido-info h4.pedido-number {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--primary-color);
-    margin: 0;
-}
-
-.pedido-info .pedido-date {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin: 0.25rem 0 0 0;
-}
-
-.pedido-details {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.75rem;
-    padding: 0.5rem 0;
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.pedido-amount, .pedido-items {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-}
-
-.pedido-amount .amount {
-    font-weight: 600;
-    color: var(--success-color);
-}
-
-.pedido-actions {
-    text-align: center;
-}
-
-.btn-pedido-detail {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
-}
-
-.btn-pedido-detail:hover {
-    background: var(--primary-dark);
-    transform: translateY(-1px);
-}
-
-.pedido-detail-expanded {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-}
-
-.pedido-productos {
-    space-y: 0.5rem;
-}
-
-.producto-pedido {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem;
-    background: var(--background-secondary);
-    border-radius: 6px;
-    font-size: 0.8rem;
-    margin-bottom: 0.5rem;
-}
-
-.producto-nombre {
-    flex: 1;
-    font-weight: 500;
-}
-
-.producto-cantidad {
-    color: var(--text-muted);
-    margin: 0 0.5rem;
-}
-
-.producto-precio {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.btn-ver-todos {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    color: var(--primary-color);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 500;
-    padding: 0.5rem;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-}
-
-.btn-ver-todos:hover {
-    background: var(--primary-light);
-    color: var(--primary-dark);
-}
-
-.empty-pedidos {
-    text-align: center;
-    padding: 2rem 1rem;
-}
-
-.empty-pedidos .empty-icon {
-    font-size: 3rem;
-    color: var(--text-muted);
-    opacity: 0.5;
-    margin-bottom: 1rem;
-}
-
-.empty-pedidos h4 {
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-}
-
-.empty-pedidos p {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
-}
-
-.btn-primera-compra {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--primary-color);
-    color: white;
-    text-decoration: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-primera-compra:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    color: white;
-}
-</style>
-
-<script>
-    // Función para expandir/contraer detalles del pedido
-    function togglePedidoDetail(pedidoId) {
-        const detail = document.getElementById(`pedido-detail-${pedidoId}`);
-        const button = event.target.closest('.btn-pedido-detail');
-        
-        if (detail.style.display === 'none' || detail.style.display === '') {
-            detail.style.display = 'block';
-            button.innerHTML = '<i class="bi bi-eye-slash"></i> Ocultar detalles';
-        } else {
-            detail.style.display = 'none';
-            button.innerHTML = '<i class="bi bi-eye"></i> Ver detalles';
-        }
-    }
-
-    // Manejo de filtros (solo para clientes)
-    {% if rol == 'cliente' %}
-    document.getElementById('category_id').addEventListener('change', function() {
-        const categoryId = this.value;
-        const subcategorySelect = document.getElementById('subcategory_id');
-        subcategorySelect.innerHTML = '<option value="">Todas las subcategorías</option>';
-        
-        if (categoryId) {
-            fetch(`/subcategories/${categoryId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(subcat => {
-                        const option = document.createElement('option');
-                        option.value = subcat.id;
-                        option.textContent = subcat.nombre;
-                        subcategorySelect.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-    });
-
-    // Manejo de agregar al carrito
-    document.querySelectorAll('.add-to-cart-btn[data-product-id]').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const productId = this.getAttribute('data-product-id');
-            const originalText = this.innerHTML;
-            
-            // Cambiar estado del botón
-            this.disabled = true;
-            this.innerHTML = '<i class="bi bi-hourglass-split"></i> Agregando...';
-            
-            fetch(`/cart/add_to_cart/${productId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Mostrar mensaje de éxito
-                    this.innerHTML = '<i class="bi bi-check-circle"></i> ¡Agregado!';
-                    this.style.background = 'var(--success-color)';
-                    
-                    // Mostrar notificación
-                    showNotification(data.message, 'success');
-                    
-                    // Restaurar botón después de 2 segundos
-                    setTimeout(() => {
-                        this.disabled = false;
-                        this.innerHTML = originalText;
-                        this.style.background = '';
-                    }, 2000);
-                } else {
-                    showNotification(data.message, 'error');
-                    this.disabled = false;
-                    this.innerHTML = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('Error al agregar al carrito', 'error');
-                this.disabled = false;
-                this.innerHTML = originalText;
-            });
-        });
-    });
-
-    // Smooth scroll para el botón "Ver Productos"
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-    {% endif %}
-
-    // Función para mostrar notificaciones
-    function showNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
-        notification.style.position = 'fixed';
-        notification.style.top = '20px';
-        notification.style.right = '20px';
-        notification.style.zIndex = '9999';
-        notification.style.minWidth = '300px';
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Auto-remover después de 5 segundos
-        setTimeout(() => {
-            if (notification.parentElement) {
-                notification.remove();
-            }
-        }, 5000);
-    }
-</script>
-
 {% endblock %}

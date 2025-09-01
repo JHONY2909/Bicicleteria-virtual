@@ -123,3 +123,9 @@ def decrease_quantity(cart_item_id):
         db.session.rollback()
         print(f"Error al disminuir la cantidad: {str(e)}")
         return jsonify({'success': False, 'message': f'Error al actualizar la cantidad: {str(e)}'}), 500
+
+@cart_bp.route('/get_cart_count', methods=['GET'])
+@login_required
+def get_cart_count():
+    cart_items = Cart.query.filter_by(user_id=current_user.id).count()
+    return jsonify({'count': cart_items})

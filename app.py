@@ -5,11 +5,14 @@ from routes.auth import auth_bp
 from routes.products import products_bp
 from routes.cart import cart_bp
 from routes.dashboard import dashboard_bp
+from routes.wishlist import wishlist_bp
 from models.product import Product
 from models.categoria import Categoria
 from models.subcategoria import Subcategoria
 from models.user import User
+from models.wishlist import Wishlist
 from datetime import timedelta
+from sqlalchemy import or_
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'tu_clave_secreta_aqui'
@@ -28,7 +31,7 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(products_bp, url_prefix='/products')
 app.register_blueprint(cart_bp, url_prefix='/cart')
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
-
+app.register_blueprint(wishlist_bp, url_prefix='/wishlist')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -37,20 +40,46 @@ def index():
             return redirect(url_for('dashboard.admin_panel'))
         elif current_user.rol in ['cliente', 'vendedor']:
             return redirect(url_for('dashboard.client_dashboard'))
+    
     categories = Categoria.query.all()
     subcategories = Subcategoria.query.all()
-    products = Product.query.all()
-    selected_category_id = request.form.get('category_id') if request.method == 'POST' else None
-    selected_subcategory_id = request.form.get('subcategory_id') if request.method == 'POST' else None
-    if request.method == 'POST':
-        print(f"Received category_id: {selected_category_id}, subcategory_id: {selected_subcategory_id}")
-        if selected_subcategory_id and selected_subcategory_id != "":
-            products = Product.query.filter_by(subcategoria_id=selected_subcategory_id).all()
-        elif selected_category_id and selected_category_id != "":
-            products = Product.query.join(Product.subcategoria).join(Subcategoria.categoria).filter(Categoria.id == selected_category_id).all()
-        else:
-            products = Product.query.all()
-    return render_template('catalog.html', products=products, categories=categories, subcategories=subcategories, selected_category_id=selected_category_id, selected_subcategory_id=selected_subcategory_id)
+    
+    # Obtener parámetros de búsqueda y filtros (GET o POST)
+    search_query = request.args.get('search', '').strip() or request.form.get('search', '').strip()
+    selected_category_id = request.args.get('category_id', '') or request.form.get('category_id', '')
+    selected_subcategory_id = request.args.get('subcategory_id', '') or request.form.get('subcategory_id', '')
+    
+    query = Product.query
+
+    # Aplicar filtro de búsqueda
+    if search_query:
+        query = query.filter(or_(
+            Product.nombre.ilike(f'%{search_query}%'),
+            Product.descripcion.ilike(f'%{search_query}%')
+        ))
+
+    # Aplicar filtro de categoría/subcategoría
+    if selected_subcategory_id and selected_subcategory_id != "":
+        query = query.filter_by(subcategoria_id=selected_subcategory_id)
+    elif selected_category_id and selected_category_id != "":
+        query = query.join(Product.subcategoria).join(Subcategoria.categoria).filter(Categoria.id == selected_category_id)
+
+    products = query.all()
+    
+    # Obtener favoritos para usuarios autenticados
+    favorites = set()
+    if current_user.is_authenticated:
+        wishlist_items = Wishlist.query.filter_by(user_id=current_user.id).all()
+        favorites = {item.product_id for item in wishlist_items}
+    
+    return render_template('catalog.html', 
+                         products=products, 
+                         categories=categories, 
+                         subcategories=subcategories, 
+                         selected_category_id=selected_category_id, 
+                         selected_subcategory_id=selected_subcategory_id, 
+                         search_query=search_query, 
+                         favorites=favorites)
 
 @app.route('/subcategories/<int:category_id>')
 def get_subcategories(category_id):

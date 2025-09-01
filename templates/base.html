@@ -3,269 +3,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Bicicletería{% endblock %}</title>
-    
-    <!-- CSS personalizado -->
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/hero.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/products.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modals.css') }}">
-    <!-- Agregando enlace al CSS del panel de administrador -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
-    
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+    <!-- Header -->
     <header class="header">
         <div class="container">
             <nav class="navbar">
-                <a class="navbar-brand" href="{{ url_for('index') }}">BikeShop</a>
-                
-                <button class="navbar-toggler" onclick="toggleMobileMenu()">
-                    <i class="bi bi-list"></i>
-                </button>
-                
-                <ul class="navbar-nav" id="navbarNav">
+                <a href="{{ url_for('index') }}" class="navbar-brand">BikeShop</a>
+                <button class="navbar-toggler"><i class="fas fa-bars"></i></button>
+                <ul class="navbar-nav">
                     {% if current_user.is_authenticated %}
                         {% if current_user.rol == 'administrador' %}
-                            <li><a class="nav-link" href="{{ url_for('dashboard.admin_panel') }}">
-                                <i class="bi bi-gear"></i> Panel Admin
-                            </a></li>
+                            <li>
+                                <a href="{{ url_for('dashboard.admin_panel') }}" class="nav-link"><i class="fas fa-user-shield"></i> Panel Admin</a>
+                            </li>
                         {% endif %}
-                        <!-- iconos para usuarios autenticados -->
-                        <li><a class="nav-link" href="#" onclick="toggleWishlist()" title="Lista de Deseos">
-                            <i class="bi bi-heart"></i>
-                        </a></li>
-                        <li><a class="nav-link cart-link" href="{{ url_for('cart.cart') }}">
-                            <i class="bi bi-cart"></i>
-                            <span class="cart-count">0</span>
-                        </a></li>
-                        <li><a class="nav-link" href="#" onclick="toggleProfile()" title="Mi Perfil">
-                            <i class="bi bi-person-circle"></i>
-                        </a></li>
-                        <!-- Quitando el enlace de cerrar sesión del header -->
+                        <li>
+                            <a href="{{ url_for('dashboard.client_dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        </li>
+                        <li class="cart-link">
+                            <a href="{{ url_for('cart.cart') }}" class="nav-link"><i class="fas fa-shopping-cart"></i> Carrito <span class="cart-count">0</span></a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('wishlist.wishlist') }}" class="nav-link"><i class="fas fa-heart"></i> Wishlist</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('auth.logout') }}" class="nav-link"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                        </li>
                     {% else %}
-                        <!-- iconos para usuarios no autenticados ahora redirigen directamente al login -->
-                        <li><a class="nav-link" href="{{ url_for('auth.login') }}" title="Lista de Deseos">
-                            <i class="bi bi-heart"></i>
-                        </a></li>
-                        <li><a class="nav-link" href="{{ url_for('auth.login') }}" title="Carrito">
-                            <i class="bi bi-cart"></i>
-                        </a></li>
-                        <li><a class="nav-link" href="#" onclick="toggleGuestProfile()" title="Iniciar Sesión">
-                            <i class="bi bi-person-circle"></i>
-                        </a></li>
+                        <li>
+                            <a href="{{ url_for('auth.login') }}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('auth.register') }}" class="nav-link"><i class="fas fa-user-plus"></i> Registrarse</a>
+                        </li>
+                        <li class="cart-link">
+                            <a href="{{ url_for('auth.login') }}" class="nav-link"><i class="fas fa-shopping-cart"></i> Carrito</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('auth.login') }}" class="nav-link"><i class="fas fa-heart"></i> Wishlist</a>
+                        </li>
                     {% endif %}
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- modales para usuarios autenticados -->
+    <!-- Modales -->
     {% if current_user.is_authenticated %}
         <!-- Modal de Perfil -->
-        <div id="profileModal" class="modal">
+        <div class="modal" id="profileModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3><i class="bi bi-person-gear"></i> Mi Perfil</h3>
-                    <button class="modal-close" onclick="toggleProfile()">&times;</button>
+                    <h3><i class="fas fa-user"></i> Mi Perfil</h3>
+                    <button class="modal-close">×</button>
                 </div>
                 <div class="modal-body">
                     <div class="profile-info">
                         <div class="profile-avatar">
-                            <div class="avatar-circle">
-                                {{ current_user.nombre_usuario[0].upper() }}
-                            </div>
+                            <div class="avatar-circle">{{ current_user.nombre_usuario[0].upper() }}</div>
                         </div>
                         <div class="profile-details">
                             <h4>{{ current_user.nombre_usuario }}</h4>
-                            <p class="text-muted">{{ current_user.correo }}</p>
-                            <span class="role-badge">{{ current_user.rol|title }}</span>
+                            <p>{{ current_user.correo }}</p>
+                            <p class="badge badge-primary">{{ current_user.rol|title }}</p>
                         </div>
                     </div>
                     <div class="profile-actions">
-                        <button class="btn btn-primary btn-sm">
-                            <i class="bi bi-pencil"></i> Editar Perfil
-                        </button>
-                        <a href="{{ url_for('dashboard.client_dashboard') }}" class="btn btn-outline btn-sm">
-                            <i class="bi bi-speedometer2"></i> Mi Dashboard
-                        </a>
-                        <!-- Agregando cerrar sesión al menú de perfil -->
-                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger btn-sm">
-                            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                        </a>
+                        <a href="#" class="btn btn-primary"><i class="fas fa-edit"></i> Editar Perfil</a>
+                        <a href="{{ url_for('dashboard.client_dashboard') }}" class="btn btn-primary"><i class="fas fa-tachometer-alt"></i> Mi Dashboard</a>
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal de Lista de Deseos -->
-        <div id="wishlistModal" class="modal">
+        <!-- Modal de Wishlist -->
+        <div class="modal" id="wishlistModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3><i class="bi bi-heart-fill"></i> Lista de Deseos</h3>
-                    <button class="modal-close" onclick="toggleWishlist()">&times;</button>
+                    <h3><i class="fas fa-heart"></i> Lista de Deseos</h3>
+                    <button class="modal-close">×</button>
                 </div>
                 <div class="modal-body">
-                    <div class="wishlist-empty">
-                        <i class="bi bi-heart" style="font-size: 3rem; opacity: 0.3;"></i>
-                        <p>Tu lista de deseos está vacía</p>
-                        <small class="text-muted">Agrega productos que te gusten para verlos aquí</small>
-                    </div>
+                    {% include 'wishlist.html' %}
                 </div>
             </div>
         </div>
     {% else %}
-        <!-- modal de perfil para usuarios no autenticados -->
-        <div id="guestProfileModal" class="modal">
+        <!-- Modal para no autenticados -->
+        <div class="modal" id="profileModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3><i class="bi bi-person-circle"></i> Acceder a tu cuenta</h3>
-                    <button class="modal-close" onclick="toggleGuestProfile()">&times;</button>
+                    <h3><i class="fas fa-user"></i> Acceder a tu cuenta</h3>
+                    <button class="modal-close">×</button>
                 </div>
-                <div class="modal-body">
-                    <div class="guest-profile-content">
-                        <div class="guest-welcome">
-                            <i class="bi bi-person-plus" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-                            <h4>¡Únete a BikeShop!</h4>
-                            <p class="text-muted">Crea una cuenta para acceder a todas las funciones</p>
-                        </div>
-                        <div class="guest-actions">
-                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
-                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-                            </a>
-                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline">
-                                <i class="bi bi-person-plus"></i> Registrarse
-                            </a>
-                        </div>
-                        <div class="guest-benefits">
-                            <h5>Con tu cuenta podrás:</h5>
-                            <ul>
-                                <li><i class="bi bi-check-circle"></i> Agregar productos al carrito</li>
-                                <li><i class="bi bi-check-circle"></i> Crear tu lista de deseos</li>
-                                <li><i class="bi bi-check-circle"></i> Realizar pedidos</li>
-                                <li><i class="bi bi-check-circle"></i> Ver tu historial de compras</li>
-                            </ul>
-                        </div>
+                <div class="modal-body guest-profile-content">
+                    <div class="guest-welcome">
+                        <i class="fas fa-bicycle fa-3x"></i>
+                        <h4>¡Únete a BikeShop!</h4>
+                        <p>Crea una cuenta para acceder a todas las funciones</p>
+                    </div>
+                    <div class="guest-actions">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary"><i class="fas fa-user-plus"></i> Registrarse</a>
+                    </div>
+                    <div class="guest-benefits">
+                        <h5>Con tu cuenta podrás:</h5>
+                        <ul>
+                            <li><i class="fas fa-check"></i> Agregar productos al carrito</li>
+                            <li><i class="fas fa-check"></i> Crear tu lista de deseos</li>
+                            <li><i class="fas fa-check"></i> Realizar pedidos</li>
+                            <li><i class="fas fa-check"></i> Ver tu historial de compras</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     {% endif %}
 
-    <main>
+    <!-- Flash messages -->
+    <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="container">
+                <div class="alerts">
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}">
+                        <div class="alert alert-{{ category }}">
                             {{ message }}
-                            <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+                            <button class="alert-close">×</button>
                         </div>
                     {% endfor %}
                 </div>
             {% endif %}
         {% endwith %}
-        
         {% block content %}{% endblock %}
-    </main>
+    </div>
 
+    <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-grid">
-                    <!-- Sección de contacto -->
-                    <div class="footer-section">
-                        <h5>Contáctanos</h5>
-                        <p><i class="bi bi-geo-alt"></i> Calle 123, Ciudad</p>
-                        <p><i class="bi bi-telephone"></i> +57 300 123 4567</p>
-                        <p><i class="bi bi-envelope"></i> contacto@bicicleteria.com</p>
-                    </div>
-
-                    <!-- Enlaces útiles -->
-                    <div class="footer-section">
-                        <h5>Enlaces</h5>
-                        <ul>
-                            <li><a href="{{ url_for('index') }}">Inicio</a></li>
-                            <li><a href="{{ url_for('auth.login') }}">Iniciar Sesión</a></li>
-                            <li><a href="{{ url_for('auth.register') }}">Registrarse</a></li>
-                            <li><a href="{{ url_for('cart.cart') }}">Carrito</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Redes sociales -->
-                    <div class="footer-section">
-                        <h5>Síguenos</h5>
-                        <div class="social-links">
-                            <a href="#" class="social-link"><i class="bi bi-facebook"></i></a>
-                            <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
-                            <a href="#" class="social-link"><i class="bi bi-twitter"></i></a>
-                            <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
-                        </div>
+        <div class="container footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h5>Contáctanos</h5>
+                    <p><i class="fas fa-map-marker-alt"></i> Calle 123, Ciudad</p>
+                    <p><i class="fas fa-phone"></i> +57 300 123 4567</p>
+                    <p><i class="fas fa-envelope"></i> contacto@bicicleteria.com</p>
+                </div>
+                <div class="footer-section">
+                    <h5>Enlaces</h5>
+                    <ul>
+                        <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Inicio</a></li>
+                        <li><a href="{{ url_for('auth.login') }}"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</a></li>
+                        <li><a href="{{ url_for('auth.register') }}"><i class="fas fa-user-plus"></i> Registrarse</a></li>
+                        <li><a href="{{ url_for('cart.cart') }}"><i class="fas fa-shopping-cart"></i> Carrito</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>Síguenos</h5>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
-            
             <div class="footer-bottom">
-                <p>&copy; 2025 BikeShop. Todos los derechos reservados.</p>
+                <p>© 2025 BikeShop. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
 
+    <!-- JavaScript para funcionalidades -->
     <script>
-        function toggleMobileMenu() {
-            const nav = document.getElementById('navbarNav');
-            nav.classList.toggle('show');
-        }
-        
-        // Cerrar menú móvil al hacer clic fuera
-        document.addEventListener('click', function(event) {
-            const nav = document.getElementById('navbarNav');
-            const toggler = document.querySelector('.navbar-toggler');
-            
-            if (!nav.contains(event.target) && !toggler.contains(event.target)) {
-                nav.classList.remove('show');
-            }
-        });
-
-        function toggleProfile() {
-            const modal = document.getElementById('profileModal');
-            if (modal) {
-                modal.classList.toggle('show');
-            }
-        }
-
-        function toggleWishlist() {
-            const modal = document.getElementById('wishlistModal');
-            if (modal) {
-                modal.classList.toggle('show');
-            }
-        }
-
-        function toggleGuestProfile() {
-            const modal = document.getElementById('guestProfileModal');
-            if (modal) {
-                modal.classList.toggle('show');
-            }
-        }
-
-        // Cerrar modales al hacer clic fuera
-        document.addEventListener('click', function(event) {
-            const modals = document.querySelectorAll('.modal');
-            modals.forEach(modal => {
-                if (event.target === modal) {
-                    modal.classList.remove('show');
-                }
+        document.addEventListener('DOMContentLoaded', function() {
+            // JavaScript para favoritos
+            const wishlistBtns = document.querySelectorAll('.wishlist-btn');
+            wishlistBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (this.tagName === 'A') return; // Ignorar enlaces para usuarios no autenticados
+                    e.preventDefault();
+                    const productId = this.dataset.productId;
+                    const isFavorited = this.classList.contains('favorited');
+                    const url = isFavorited ? `/wishlist/remove_from_wishlist/${productId}` : `/wishlist/add_to_wishlist/${productId}`;
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.classList.toggle('favorited');
+                            alert(data.message);
+                            if (document.querySelector('#wishlistModal')?.classList.contains('show')) {
+                                location.reload();
+                            }
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
             });
+
+            // JavaScript para eliminar de wishlist
+            const removeBtns = document.querySelectorAll('.remove-wishlist-btn');
+            removeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const productId = this.dataset.productId;
+                    fetch(`/wishlist/remove_from_wishlist/${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.parentElement.remove();
+                            if (document.querySelectorAll('.wishlist-item').length === 0) {
+                                location.reload();
+                            }
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+
+            // JavaScript para agregar al carrito
+            const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
+            addToCartBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (this.tagName === 'A') return; // Ignorar enlaces para usuarios no autenticados
+                    e.preventDefault();
+                    const productId = this.dataset.productId;
+                    fetch(`/cart/add_to_cart/${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            const cartCount = document.querySelector('.cart-count');
+                            if (cartCount) {
+                                cartCount.textContent = parseInt(cartCount.textContent) + 1;
+                            }
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error al agregar al carrito:', error));
+                });
+            });
+
+            // JavaScript para actualizar contador de carrito inicial
+            function updateCartCount() {
+                {% if current_user.is_authenticated %}
+                fetch('/cart/get_cart_count', {
+                    method: 'GET'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const cartCount = document.querySelector('.cart-count');
+                        if (cartCount) {
+                            cartCount.textContent = data.count;
+                        }
+                    } else {
+                        console.error('Error al obtener el conteo del carrito:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error al actualizar contador de carrito:', error));
+                {% else %}
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                    cartCount.textContent = 0;
+                }
+                {% endif %}
+            }
+            updateCartCount();
+
+            // JavaScript para modales
+            const profileModal = document.querySelector('#profileModal');
+            const wishlistModal = document.querySelector('#wishlistModal');
+            const modalCloses = document.querySelectorAll('.modal-close');
+
+            document.querySelectorAll('.nav-link[data-toggle="modal"]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = this.getAttribute('data-target');
+                    document.querySelector(target).classList.add('show');
+                });
+            });
+
+            modalCloses.forEach(close => {
+                close.addEventListener('click', function() {
+                    this.closest('.modal').classList.remove('show');
+                });
+            });
+
+            // JavaScript para actualizar subcategorías
+            function updateSubcategories(select) {
+                const categoryId = select.value;
+                const subcategorySelect = select.closest('.filters-row').querySelector('select[name="subcategory_id"]');
+                if (!categoryId) {
+                    subcategorySelect.innerHTML = '<option value="">Todas las subcategorías</option>';
+                    {% for subcategory in subcategories %}
+                        subcategorySelect.innerHTML += `<option value="{{ subcategory.id }}">{{ subcategory.nombre }}</option>`;
+                    {% endfor %}
+                    return;
+                }
+                fetch(`/subcategories/${categoryId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        subcategorySelect.innerHTML = '<option value="">Todas las subcategorías</option>';
+                        data.forEach(subcat => {
+                            subcategorySelect.innerHTML += `<option value="${subcat.id}">${subcat.nombre}</option>`;
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
         });
     </script>
 </body>

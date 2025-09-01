@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Lista de Deseos - BikeShop{% endblock %}
+{% block content %}
+
+<div class="products-section">
+    <div class="section-header">
+        <h2 class="section-title">Tu Lista de Deseos</h2>
+        <p class="section-subtitle">Productos que te han gustado</p>
+    </div>
+
+    <div class="products-grid">
+        {% include 'wishlist.html' %}
+    </div>
+
+    <div class="cart-actions">
+        <a href="{{ url_for('products.catalog') }}" class="continue-shopping">Volver al Catálogo</a>
+    </div>
+</div>
+
+{% endblock %}
