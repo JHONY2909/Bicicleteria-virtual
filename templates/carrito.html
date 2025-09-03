@@ -107,12 +107,11 @@
             const cartItemId = this.getAttribute('data-cart-item-id');
             
             if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-                fetch(`/cart/remove/${cartItemId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
+               fetch(`/cart/remove_from_cart/${cartItemId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+})
+
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
