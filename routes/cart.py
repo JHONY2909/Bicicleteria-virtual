@@ -6,9 +6,12 @@ from models.pedido import Pedido
 from models.cart import Cart
 from models.product import Product
 from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
 from io import BytesIO
 from extensions import db
-from reportlab.pdfgen import canvas
 import datetime
 
 cart_bp = Blueprint('cart', __name__)
@@ -229,25 +232,92 @@ def descargar_factura(pedido_id):
     
     # Generar PDF con reportlab
     buffer = BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch, leftMargin=0.5*inch, rightMargin=0.5*inch)
+    elements = []
     
-    # Contenido de la factura (personaliza según necesites)
-    p.drawString(100, height - 100, f"Factura #{pedido.id}")
-    p.drawString(100, height - 120, f"Fecha: {pedido.fecha_creacion.strftime('%d/%m/%Y')}")
-    p.drawString(100, height - 140, f"Cliente: {current_user.nombre_usuario}")
-    p.drawString(100, height - 160, f"Método de Pago: {pedido.metodo_pago}")
-    p.drawString(100, height - 180, f"Monto Total: ${pedido.monto_total}")
+    # Estilos para el texto
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        name='TitleStyle',
+        fontName='Helvetica-Bold',
+        fontSize=20,
+        leading=24,
+        alignment=1,  # Centrado
+        spaceAfter=12
+    )
+    subtitle_style = ParagraphStyle(
+        name='SubtitleStyle',
+        fontName='Helvetica',
+        fontSize=12,
+        leading=14,
+        spaceAfter=6
+    )
+    footer_style = ParagraphStyle(
+        name='FooterStyle',
+        fontName='Helvetica-Oblique',
+        fontSize=10,
+        leading=12,
+        alignment=1,
+        textColor=colors.grey
+    )
     
-    # Agregar detalles de productos
-    y = height - 220
-    p.drawString(100, y, "Detalles:")
-    y -= 20  # Mover a la siguiente línea para los items
+    # Encabezado
+    elements.append(Paragraph("BikeShop", title_style))
+    elements.append(Paragraph("Factura de Compra", title_style))
+    elements.append(Spacer(1, 0.2*inch))
+    elements.append(Paragraph(f"Factura #{pedido.id}", subtitle_style))
+    elements.append(Paragraph(f"Fecha: {pedido.fecha_creacion.strftime('%d/%m/%Y')}", subtitle_style))
+    elements.append(Paragraph(f"Cliente: {current_user.nombre_usuario}", subtitle_style))
+    elements.append(Paragraph(f"Método de Pago: {pedido.metodo_pago.title()}", subtitle_style))
+    if pedido.direccion:
+        elements.append(Paragraph(f"Dirección: {pedido.direccion.calle}, {pedido.direccion.ciudad} {pedido.direccion.codigo_postal or ''}", subtitle_style))
+    else:
+        elements.append(Paragraph("Dirección: No disponible", subtitle_style))
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Datos de la tabla de detalles
+    data = [['Producto', 'Cantidad', 'Precio Unitario', 'Subtotal']]
     for detalle in pedido.detalles:
-        p.drawString(100, y, f"{detalle.producto.nombre} x {detalle.cantidad} - ${detalle.precio_unitario * detalle.cantidad}")
-        y -= 20
+        subtotal = detalle.precio_unitario * detalle.cantidad
+        data.append([
+            detalle.producto.nombre,
+            str(detalle.cantidad),
+            f"${detalle.precio_unitario:.2f}",
+            f"${subtotal:.2f}"
+        ])
+    data.append(['', '', 'Total:', f"${pedido.monto_total:.2f}"])
     
-    p.save()
+    # Crear tabla con anchos personalizados
+    col_widths = [3.5*inch, 1*inch, 1.5*inch, 1.5*inch]
+    table = Table(data, colWidths=col_widths)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -2), colors.lightgrey),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('TOPPADDING', (0, 1), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+        ('ALIGN', (2, -1), (3, -1), 'RIGHT'),  # Alinear total a la derecha
+        ('FONTNAME', (2, -1), (3, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (2, -1), (3, -1), 12),
+    ]))
+    
+    elements.append(table)
+    elements.append(Spacer(1, 0.3*inch))
+    
+    # Pie de página
+    elements.append(Paragraph("Gracias por su compra en BikeShop", subtitle_style))
+    elements.append(Paragraph("Contáctanos: contacto@bicicleteria.com | +57 300 123 4567", footer_style))
+    elements.append(Paragraph("© 2025 BikeShop. Todos los derechos reservados.", footer_style))
+    
+    # Construir el PDF
+    doc.build(elements)
     buffer.seek(0)
     
     response = make_response(buffer.getvalue())

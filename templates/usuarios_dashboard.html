@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% block title %}Panel de {{ rol|title }} - Bicicletería{% endblock %}
 {% block content %}
@@ -17,48 +16,108 @@
         </div>
     </div>
 
-    <div class="container">
-        <div class="cart-table">
-    <div class="cart-table-header">
-        <h2 class="cart-title">Mis Pedidos</h2>
-        {% if pedidos %}
-            <p class="cart-count">{{ pedidos|length }} pedidos</p>
-        {% endif %}
-    </div>
-    
-    {% if pedidos %}
-        {% for pedido in pedidos[:4] %}
-            <div class="cart-item">
-                <div class="cart-item-row">
-                    <div class="cart-item-product">
-                        <h4>Pedido #{{ pedido.id }}</h4>
-                        <p>{{ pedido.fecha_creacion.strftime('%d/%m/%Y') if pedido.fecha_creacion else 'Fecha no disponible' }}</p>
+    <!-- Agregada sección de Nuestros Servicios -->
+    <section class="services-section">
+        <div class="container services-container">
+            <div class="services-header">
+                <h2 class="services-title">Nuestros Servicios</h2>
+                <p class="services-subtitle">Ofrecemos servicios especializados para mantener tu bicicleta en perfectas condiciones y brindarte la mejor experiencia ciclística</p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-tools"></i>
                     </div>
-                    <div>{{ pedido.estado|title }}</div>
-                    <div>${{ "%.2f"|format(pedido.monto_total) }}</div>
-                    <div>
-                        <a href="{{ url_for('dashboard.pedido_detalle', pedido_id=pedido.id) }}" class="btn btn-primary">Ver detalles</a>
-                        {% if pedido.estado == 'pagado' %}
-                            <a href="{{ url_for('cart.descargar_factura', pedido_id=pedido.id) }}" class="btn btn-primary">Descargar Factura</a>
-                        {% endif %}
+                    <h3 class="service-title">Mantenimiento Completo</h3>
+                    <p class="service-description">Revisión integral de tu bicicleta, ajuste de frenos, cambios y lubricación de componentes para un rendimiento óptimo.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-wrench"></i>
                     </div>
+                    <h3 class="service-title">Reparaciones Especializadas</h3>
+                    <p class="service-description">Diagnóstico y reparación de averías complejas con técnicos especializados y repuestos originales de calidad.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-bicycle"></i>
+                    </div>
+                    <h3 class="service-title">Ensamblaje Personalizado</h3>
+                    <p class="service-description">Armado de bicicletas a medida según tus necesidades y preferencias, con asesoramiento profesional incluido.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3 class="service-title">Entrega a Domicilio</h3>
+                    <p class="service-description">Servicio de entrega rápida y segura de productos y bicicletas reparadas directamente en tu hogar.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3 class="service-title">Asesoramiento Técnico</h3>
+                    <p class="service-description">Consultoría especializada para elegir la bicicleta perfecta y consejos de mantenimiento preventivo.</p>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="service-title">Garantía Extendida</h3>
+                    <p class="service-description">Protección adicional para tus compras con garantía extendida y soporte técnico continuo.</p>
                 </div>
             </div>
-        {% endfor %}
-        {% if pedidos|length > 4 %}
-            <div class="cart-actions">
-                <a href="{{ url_for('dashboard.mis_pedidos') }}" class="btn btn-primary">Ver todos mis pedidos</a>
-            </div>
-        {% endif %}
-    {% else %}
-        <div class="empty-cart">
-            <i class="fas fa-shopping-cart empty-cart-icon"></i>
-            <h3>No tienes pedidos aún</h3>
-            <p>¡Explora nuestro catálogo y realiza tu primera compra!</p>
-            <a href="{{ url_for('products.catalog') }}" class="btn btn-primary">Explorar productos</a>
         </div>
-    {% endif %}
-</div>
+    </section>
+
+    <div class="container">
+        <div class="cart-table">
+            <div class="cart-table-header">
+                <h2 class="cart-title">Mis Pedidos</h2>
+                {% if pedidos %}
+                    <p class="cart-count">{{ pedidos|length }} pedidos</p>
+                {% endif %}
+            </div>
+            
+            {% if pedidos %}
+                {% for pedido in pedidos[:4] %}
+                    <div class="cart-item">
+                        <div class="cart-item-row">
+                            <div class="cart-item-product">
+                                <h4>Pedido #{{ pedido.id }}</h4>
+                                <p>{{ pedido.fecha_creacion.strftime('%d/%m/%Y') if pedido.fecha_creacion else 'Fecha no disponible' }}</p>
+                            </div>
+                            <div>{{ pedido.estado|title }}</div>
+                            <div>${{ "%.2f"|format(pedido.monto_total) }}</div>
+                            <div>
+                                <a href="{{ url_for('dashboard.pedido_detalle', pedido_id=pedido.id) }}" class="btn btn-primary">Ver detalles</a>
+                                {% if pedido.estado == 'pagado' %}
+                                    <a href="{{ url_for('cart.descargar_factura', pedido_id=pedido.id) }}" class="btn btn-primary">Descargar Factura</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                {% if pedidos|length > 4 %}
+                    <div class="cart-actions">
+                        <a href="{{ url_for('dashboard.mis_pedidos') }}" class="btn btn-primary">Ver todos mis pedidos</a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart empty-cart-icon"></i>
+                    <h3>No tienes pedidos aún</h3>
+                    <p>¡Explora nuestro catálogo y realiza tu primera compra!</p>
+                    <a href="{{ url_for('products.catalog') }}" class="btn btn-primary">Explorar productos</a>
+                </div>
+            {% endif %}
+        </div>
         <div class="products-section" id="products">
             <div class="section-header">
                 <h2 class="section-title">Catálogo de Productos</h2>
