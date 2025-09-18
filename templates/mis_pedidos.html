@@ -1,27 +1,45 @@
-<!-- Asumiendo tabla de pedidos -->
-<table class="cart-table">
-    <thead>
-        <tr>
-            <th>Pedido</th>
-            <th>Fecha</th>
-            <th>Monto</th>
-            <th>Estado</th>
-            <th>Factura</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for pedido in pedidos %}
-        <tr>
-            <td>#{{ pedido.id }}</td>
-            <td>{{ pedido.fecha_creacion.strftime('%d/%m/%Y') }}</td>
-            <td>${{ "%.2f"|format(pedido.monto_total) }}</td>
-            <td>{{ pedido.estado }}</td>
-            <td>
-                {% if pedido.estado == 'pagado' %}
-                <a href="{{ url_for('cart.descargar_factura', pedido_id=pedido.id) }}" class="btn btn-primary">Descargar Factura</a>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% extends 'base.html' %}
+
+{% block title %}Mis Pedidos - BikeShop{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mis_pedidos.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="mis-pedidos-container">
+    <h2>Mis Pedidos</h2>
+    {% if pedidos %}
+    <table class="cart-table">
+        <thead>
+            <tr>
+                <th>Pedido</th>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th>Factura</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr>
+                <td data-label="Pedido">#{{ pedido.id }}</td>
+                <td data-label="Fecha">{{ pedido.fecha_creacion.strftime('%d/%m/%Y') }}</td>
+                <td data-label="Monto">${{ "%.2f"|format(pedido.monto_total) }}</td>
+                <td data-label="Estado" class="status-{{ pedido.estado }}">{{ pedido.estado|title }}</td>
+                <td data-label="Factura">
+                    {% if pedido.estado == 'pagado' %}
+                    <a href="{{ url_for('cart.descargar_factura', pedido_id=pedido.id) }}" class="btn btn-primary">Descargar Factura</a>
+                    {% else %}
+                    Pendiente
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No tienes pedidos aún. <a href="{{ url_for('products.index') }}">¡Explora nuestros productos!</a></p>
+    {% endif %}
+</div>
+{% endblock %}

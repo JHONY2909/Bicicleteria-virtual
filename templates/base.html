@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
     <!-- Agregado CSS para la sección de servicios -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/services.css') }}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <header class="header">
