@@ -9,6 +9,7 @@ from models.cart import Cart
 from extensions import db
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_
+from werkzeug.security import generate_password_hash
 
 from models.wishlist import Wishlist
 
@@ -44,6 +45,50 @@ def usuarios():
         return redirect(url_for('auth.login'))
     usuarios = User.query.all()
     return render_template('usuarios.html', usuarios=usuarios)
+
+@dashboard_bp.route('/admin/agregar_usuario', methods=['GET', 'POST'])
+@login_required
+def agregar_usuario():
+    if current_user.rol != 'administrador':
+        flash('Acceso denegado', 'danger')
+        return redirect(url_for('auth.login'))
+    if request.method == 'POST':
+        nombre_usuario = request.form['nombre_usuario']
+        contrasena = request.form['contrasena']
+        correo = request.form['correo']
+        telefono = request.form.get('telefono', '')
+        apellido = request.form.get('apellido', '')
+        rol = request.form['rol']
+
+        # Validaciones
+        if not nombre_usuario or not contrasena or not correo:
+            flash('Nombre de usuario, contraseña y correo son obligatorios', 'danger')
+            return redirect(url_for('dashboard.agregar_usuario'))
+
+        # Verificar si el usuario ya existe
+        existing_user = User.query.filter((User.nombre_usuario == nombre_usuario) | (User.correo == correo)).first()
+        if existing_user:
+            flash('El nombre de usuario o correo ya está en uso', 'danger')
+            return redirect(url_for('dashboard.agregar_usuario'))
+
+        # Hash de la contraseña
+        hashed_password = generate_password_hash(contrasena)
+
+        # Crear nuevo usuario
+        nuevo_usuario = User(
+            nombre_usuario=nombre_usuario,
+            contrasena=hashed_password,
+            correo=correo,
+            telefono=telefono,
+            apellido=apellido,
+            rol=rol
+        )
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+        flash('Usuario agregado exitosamente', 'success')
+        return redirect(url_for('dashboard.usuarios'))
+
+    return render_template('agregar_usuario.html')
 
 @dashboard_bp.route('/admin/categorias', methods=['GET', 'POST'])
 @login_required

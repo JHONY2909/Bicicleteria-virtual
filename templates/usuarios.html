@@ -51,6 +51,9 @@
         <div class="table-header">
             <h2>Lista de Usuarios</h2>
             <div class="table-filters">
+                <a href="{{ url_for('dashboard.agregar_usuario') }}" class="btn-primary">
+                    <i class="bi bi-person-plus"></i> Agregar Usuario
+                </a>
                 <input type="text" id="searchUsers" placeholder="Buscar usuarios..." class="search-input">
             </div>
         </div>
