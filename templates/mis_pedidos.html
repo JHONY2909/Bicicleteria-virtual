@@ -17,6 +17,7 @@
                 <th>Fecha</th>
                 <th>Monto</th>
                 <th>Estado</th>
+                <th>Detalles</th>
                 <th>Factura</th>
             </tr>
         </thead>
@@ -27,6 +28,9 @@
                 <td data-label="Fecha">{{ pedido.fecha_creacion.strftime('%d/%m/%Y') }}</td>
                 <td data-label="Monto">${{ "%.2f"|format(pedido.monto_total) }}</td>
                 <td data-label="Estado" class="status-{{ pedido.estado }}">{{ pedido.estado|title }}</td>
+                <td data-label="Detalles">
+                    <a href="{{ url_for('dashboard.pedido_detalle', pedido_id=pedido.id) }}" class="btn btn-primary">Ver Detalles</a>
+                </td>
                 <td data-label="Factura">
                     {% if pedido.estado == 'pagado' %}
                     <a href="{{ url_for('cart.descargar_factura', pedido_id=pedido.id) }}" class="btn btn-primary">Descargar Factura</a>
@@ -38,6 +42,29 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Paginación -->
+    <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('dashboard.mis_pedidos', page=pagination.prev_num) }}" class="btn btn-secondary">Anterior</a>
+        {% endif %}
+
+        {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+                {% if page_num == pagination.page %}
+                    <span class="current-page">{{ page_num }}</span>
+                {% else %}
+                    <a href="{{ url_for('dashboard.mis_pedidos', page=page_num) }}" class="btn btn-outline">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+                <span class="pagination-dots">...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+            <a href="{{ url_for('dashboard.mis_pedidos', page=pagination.next_num) }}" class="btn btn-secondary">Siguiente</a>
+        {% endif %}
+    </div>
     {% else %}
     <p>No tienes pedidos aún. <a href="{{ url_for('products.index') }}">¡Explora nuestros productos!</a></p>
     {% endif %}

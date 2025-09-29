@@ -7,17 +7,19 @@
     <div class="hero-content">
       <h1 class="hero-title">¡Bienvenido a nuestra Bicicletería!</h1>
       <p class="hero-subtitle">Descubre los mejores productos para tu bicicleta y vive la aventura sobre ruedas</p>
-      <div class="hero-buttons">
-        {% if current_user.is_authenticated %}
+      {% if current_user.is_authenticated %}
+        <p class="hero-text">¡Hola, {{ current_user.nombre_usuario }}! Explora nuestro catálogo.</p>
+        <div class="hero-buttons">
           <a href="{{ url_for('dashboard.client_dashboard') }}" class="hero-btn hero-btn-primary">Explorar Productos</a>
           <a href="{{ url_for('cart.cart') }}" class="hero-btn hero-btn-primary">Ver Carrito</a>
-          <p class="hero-text">¡Hola, {{ current_user.nombre_usuario }}! Explora nuestro catálogo.</p>
-        {% else %}
+        </div>
+      {% else %}
+        <p class="hero-text">¡Regístrate para comenzar a comprar!</p>
+        <div class="hero-buttons">
           <a href="{{ url_for('auth.register') }}" class="hero-btn hero-btn-primary">Registrarse</a>
           <a href="{{ url_for('auth.login') }}" class="hero-btn hero-btn-outline">Iniciar Sesión</a>
-          <p class="hero-text">¡Regístrate para comenzar a comprar!</p>
-        {% endif %}
-      </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 

@@ -354,5 +354,7 @@ def mis_pedidos():
     if current_user.rol != 'cliente':
         flash('Acceso denegado', 'danger')
         return redirect(url_for('dashboard.client_dashboard'))
-    pedidos = Pedido.query.filter_by(usuario_id=current_user.id).all()
-    return render_template('mis_pedidos.html', pedidos=pedidos)
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # Pedidos por página
+    pedidos_paginated = Pedido.query.filter_by(usuario_id=current_user.id).order_by(Pedido.fecha_creacion.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    return render_template('mis_pedidos.html', pedidos=pedidos_paginated.items, pagination=pedidos_paginated)

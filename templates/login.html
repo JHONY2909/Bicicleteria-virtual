@@ -22,8 +22,8 @@
             </label>
             <div class="password-input-group">
                 <input type="password" class="form-control" id="password" name="password" required>
-                <button type="button" class="password-toggle" onclick="togglePassword('password')">
-                    <i class="bi bi-eye" id="password-icon"></i>
+                <button type="button" class="password-toggle" onclick="togglePassword('password')" aria-label="Mostrar contraseña">
+                    <i class="bi bi-eye password-icon" id="password-icon"></i>
                 </button>
             </div>
         </div>
@@ -43,13 +43,16 @@
     function togglePassword(inputId) {
         const input = document.getElementById(inputId);
         const icon = document.getElementById(inputId + '-icon');
+        const button = icon.parentElement;
         
         if (input.type === 'password') {
             input.type = 'text';
-            icon.className = 'bi bi-eye-slash';
+            icon.className = 'bi bi-eye-slash password-icon';
+            button.setAttribute('aria-label', 'Ocultar contraseña');
         } else {
             input.type = 'password';
-            icon.className = 'bi bi-eye';
+            icon.className = 'bi bi-eye password-icon';
+            button.setAttribute('aria-label', 'Mostrar contraseña');
         }
     }
 </script>

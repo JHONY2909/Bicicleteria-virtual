@@ -79,9 +79,9 @@
     <div class="container">
         <div class="cart-table">
             <div class="cart-table-header">
-                <h2 class="cart-title">Mis Pedidos</h2>
+                <h2 class="cart-title">Últimos Pedidos</h2>
                 {% if pedidos %}
-                    <p class="cart-count">{{ pedidos|length }} pedidos</p>
+                    <p class="cart-count">{{ pedidos|length }} pedidos totales</p>
                 {% endif %}
             </div>
             
@@ -106,7 +106,7 @@
                 {% endfor %}
                 {% if pedidos|length > 4 %}
                     <div class="cart-actions">
-                        <a href="{{ url_for('dashboard.mis_pedidos') }}" class="btn btn-primary">Ver todos mis pedidos</a>
+                        <a href="{{ url_for('dashboard.mis_pedidos') }}" class="btn btn-primary">Ver todos los pedidos</a>
                     </div>
                 {% endif %}
             {% else %}
