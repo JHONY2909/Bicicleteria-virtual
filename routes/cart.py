@@ -262,7 +262,7 @@ def descargar_factura(pedido_id):
     )
     
     # Encabezado
-    elements.append(Paragraph("BikeShop", title_style))
+    elements.append(Paragraph("BikeJhony", title_style))
     elements.append(Paragraph("Factura de Compra", title_style))
     elements.append(Spacer(1, 0.2*inch))
     elements.append(Paragraph(f"Factura #{pedido.id}", subtitle_style))
@@ -312,9 +312,9 @@ def descargar_factura(pedido_id):
     elements.append(Spacer(1, 0.3*inch))
     
     # Pie de página
-    elements.append(Paragraph("Gracias por su compra en BikeShop", subtitle_style))
-    elements.append(Paragraph("Contáctanos: contacto@bicicleteria.com | +57 300 123 4567", footer_style))
-    elements.append(Paragraph("© 2025 BikeShop. Todos los derechos reservados.", footer_style))
+    elements.append(Paragraph("Gracias por su compra en BikeJhony", subtitle_style))
+    elements.append(Paragraph("Contáctanos: jhonysaavedra272@gmail.com | +57 3208381949", footer_style))
+    elements.append(Paragraph("© 2025 BikeJhony Todos los derechos reservados.", footer_style))
     
     # Construir el PDF
     doc.build(elements)

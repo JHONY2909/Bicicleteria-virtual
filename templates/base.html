@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BikeShop{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Bootstrap Icons -->
@@ -60,76 +61,74 @@
 </head>
 <body>
     <header class="header">
-        <div class="container">
-            <nav class="navbar">
-                <a href="{{ url_for('index') }}" class="navbar-brand">
-                    <span>BikeShop</span>
-                </a>
-                <button class="navbar-toggler" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="navbarNav">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav">
-                        {% if current_user.is_authenticated %}
-                            {% if current_user.rol == 'administrador' %}
-                                <li class="nav-item">
-                                    <a href="{{ url_for('dashboard.admin_panel') }}" class="nav-link">
-                                        <i class="fas fa-user-shield"></i> Panel Admin
-                                    </a>
-                                </li>
-                            {% endif %}
-                           
-                            <li class="nav-item cart-link">
-                                <a href="{{ url_for('cart.cart') }}" class="nav-link">
-                                    <i class="fas fa-shopping-cart"></i> Carrito <span class="cart-count">0</span>
-                                </a>
-                            </li>
+        <nav class="navbar">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="navbarNav">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="{{ url_for('index') }}" class="navbar-brand">
+                <span>BikeJhony</span>
+            </a>
+            <div class="navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.rol == 'administrador' %}
                             <li class="nav-item">
-                                <a href="{{ url_for('wishlist.wishlist') }}" class="nav-link">
-                                    <i class="fas fa-heart"></i> Wishlist
-                                </a>
-                            </li>
-                            <li class="nav-item profile-link">
-                                <a href="#" class="nav-link" data-toggle="modal" data-target="#profile-modal">
-                                    <i class="fas fa-user"></i> Perfil
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ url_for('auth.logout') }}" class="nav-link">
-                                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a href="{{ url_for('auth.login') }}" class="nav-link">
-                                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ url_for('auth.register') }}" class="nav-link">
-                                    <i class="fas fa-user-plus"></i> Registrarse
-                                </a>
-                            </li>
-                            <li class="nav-item cart-link">
-                                <a href="{{ url_for('cart.cart') }}" class="nav-link">
-                                    <i class="fas fa-shopping-cart"></i> Carrito
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ url_for('wishlist.wishlist') }}" class="nav-link">
-                                    <i class="fas fa-heart"></i> Wishlist
-                                </a>
-                            </li>
-                            <li class="nav-item profile-link">
-                                <a href="#" class="nav-link" data-toggle="modal" data-target="#guest-modal">
-                                    <i class="fas fa-user"></i> Perfil
+                                <a href="{{ url_for('dashboard.admin_panel') }}" class="nav-link">
+                                    <i class="fas fa-user-shield"></i> Panel Admin
                                 </a>
                             </li>
                         {% endif %}
-                    </ul>
-                </div>
-            </nav>
-        </div>
+
+                        <li class="nav-item cart-link">
+                            <a href="{{ url_for('cart.cart') }}" class="nav-link">
+                                <i class="fas fa-shopping-cart"></i> Carrito <span class="cart-count">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('wishlist.wishlist') }}" class="nav-link">
+                                <i class="fas fa-heart"></i> Wishlist
+                            </a>
+                        </li>
+                        <li class="nav-item profile-link">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#profile-modal">
+                                <i class="fas fa-user"></i> Perfil
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('auth.logout') }}" class="nav-link">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('auth.login') }}" class="nav-link">
+                                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('auth.register') }}" class="nav-link">
+                                <i class="fas fa-user-plus"></i> Registrarse
+                            </a>
+                        </li>
+                        <li class="nav-item cart-link">
+                            <a href="{{ url_for('cart.cart') }}" class="nav-link">
+                                <i class="fas fa-shopping-cart"></i> Carrito
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('wishlist.wishlist') }}" class="nav-link">
+                                <i class="fas fa-heart"></i> Wishlist
+                            </a>
+                        </li>
+                        <li class="nav-item profile-link">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#guest-modal">
+                                <i class="fas fa-user"></i> Perfil
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
     </header>
 
     <!-- Modales -->
@@ -232,7 +231,7 @@
                 </div>
             </div>
             <div class="footer-bottom text-center">
-                <p>© 2025 BikeShop. Todos los derechos reservados.</p>
+                <p>2025 BikeJhony Todos los derechos reservados</p>
             </div>
         </div>
     </footer>

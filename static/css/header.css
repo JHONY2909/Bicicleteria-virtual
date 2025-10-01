@@ -13,7 +13,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 0;
+  padding: 1.25rem 24px;
   min-height: 80px;
 }
 
@@ -202,6 +202,7 @@
 /* Navbar collapse */
 .navbar-collapse {
   display: flex; /* Visible by default on larger screens */
+  justify-content: flex-end;
   transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
 
@@ -247,6 +248,12 @@
 
 /* Responsive navbar */
 @media (max-width: 768px) {
+  .navbar {
+    justify-content: flex-start;
+    padding: 1.25rem 16px;
+    flex-wrap: wrap;
+  }
+
   .navbar-toggler {
     display: block; /* Show hamburger on mobile */
   }
@@ -255,37 +262,57 @@
     display: block;
     max-height: 0;
     opacity: 0;
-    background: #222;
+    background: var(--gradient-dark);
+    backdrop-filter: blur(15px);
     padding: 0 1.5rem;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
     width: 100%;
+    flex-basis: 100%;
     overflow: hidden;
-    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out;
+    transform: translateY(-10px);
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, padding 0.3s ease-in-out, transform 0.3s ease-in-out;
   }
 
   .navbar-collapse.show {
     max-height: 500px; /* Adjust based on content height */
     opacity: 1;
     padding: 1.5rem;
+    transform: translateY(0);
   }
 
   .navbar-nav {
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.8rem;
+    gap: 1rem;
   }
 
   .nav-link {
     width: 100%;
     justify-content: flex-start;
-    padding: 0.8rem 1rem;
-    margin-bottom: 0.5rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
   }
 
   .nav-link:last-child {
     margin-bottom: 0;
+  }
+}
+
+/* Desktop navbar adjustments */
+@media (min-width: 769px) {
+  .navbar-collapse {
+    flex-grow: 1;
   }
 }
 

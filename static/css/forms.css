@@ -447,3 +447,17 @@
 .password-icon {
   color: black !important;
 }
+
+/* Hide browser's default password reveal icons */
+input[type="password"]::-ms-reveal {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none;
+}
+
+input[type="password"]::-webkit-password-toggle {
+  -webkit-appearance: none;
+  display: none;
+}

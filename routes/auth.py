@@ -20,6 +20,10 @@ def register():
         if user:
             flash('El nombre de usuario ya existe', 'error')
             return redirect(url_for('auth.register'))
+        user = User.query.filter_by(correo=correo).first()
+        if user:
+            flash('El correo electrónico ya está registrado', 'error')
+            return redirect(url_for('auth.register'))
         user = User(
             nombre_usuario=nombre_usuario,
             contrasena=generate_password_hash(contrasena),
@@ -42,12 +46,12 @@ def login():
             return redirect(url_for('dashboard.client_dashboard'))
         return redirect(url_for('index'))
     if request.method == 'POST':
-        username = request.form.get('username')
+        identifier = request.form.get('identifier')
         password = request.form.get('password')
-        if not username or not password:
+        if not identifier or not password:
             flash('Por favor, completa todos los campos.', 'error')
             return redirect(url_for('auth.login'))
-        user = User.query.filter_by(nombre_usuario=username).first()
+        user = User.query.filter((User.nombre_usuario == identifier) | (User.correo == identifier)).first()
         if user and user.check_password(password):
             login_user(user)
             if user.rol == 'administrador':
@@ -55,7 +59,7 @@ def login():
             elif user.rol in ['cliente', 'vendedor']:
                 return redirect(url_for('dashboard.client_dashboard'))
             return redirect(url_for('index'))
-        flash('Credenciales inválidas', 'error')
+        flash('Usuario o contraseña incorrectos', 'error')
     return render_template('login.html')
 
 @auth_bp.route('/logout')
