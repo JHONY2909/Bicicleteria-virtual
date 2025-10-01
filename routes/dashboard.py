@@ -6,6 +6,7 @@ from models.subcategoria import Subcategoria
 from models.user import User
 from models.pedido import Pedido
 from models.cart import Cart
+from models.detalle_pedido import DetallePedido
 from extensions import db
 from sqlalchemy.orm import joinedload
 from sqlalchemy import or_
@@ -187,6 +188,7 @@ def editar_producto(product_id):
 def eliminar_producto(product_id):
     try:
         print(f"Intentando eliminar producto ID: {product_id}")
+        print(f"Usuario actual: {current_user.nombre_usuario}, Rol: {current_user.rol}")
         if current_user.rol != 'administrador':
             print("Acceso denegado: usuario no es administrador")
             return jsonify({'success': False, 'message': 'Acceso denegado'}), 403
@@ -196,6 +198,12 @@ def eliminar_producto(product_id):
         # Eliminar ítems del carrito asociados al producto
         deleted_rows = Cart.query.filter_by(product_id=product_id).delete()
         print(f"Ítems del carrito eliminados: {deleted_rows}")
+        # Eliminar ítems de wishlist asociados al producto
+        deleted_wishlist = Wishlist.query.filter_by(product_id=product_id).delete()
+        print(f"Ítems de wishlist eliminados: {deleted_wishlist}")
+        # Eliminar detalles de pedidos asociados al producto
+        deleted_detalles = DetallePedido.query.filter_by(product_id=product_id).delete()
+        print(f"Detalles de pedidos eliminados: {deleted_detalles}")
         db.session.delete(product)
         db.session.commit()
         print(f"Producto eliminado: {product_id}")
